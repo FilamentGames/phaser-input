@@ -3,7 +3,7 @@
  * Adds input boxes to Phaser like CanvasInput, but also works for WebGL and Mobile, made for Phaser only.
  *
  * OrangeGames
- * Build at 28-07-2016
+ * Build at 18-08-2016
  * Released under MIT License 
  */
 
@@ -650,6 +650,7 @@ var Fabrique;
     })(Phaser.Graphics);
     Fabrique.TextMask = TextMask;
 })(Fabrique || (Fabrique = {}));
+///<reference path="./phaser-input-shim.d.ts"/>
 var Fabrique;
 (function (Fabrique) {
     var Plugins;

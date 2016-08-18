@@ -1,3 +1,5 @@
+///<reference path="./phaser-input-shim.d.ts"/>
+
 module Fabrique {
     export module Plugins {
         export interface InputFieldObjectFactory extends Phaser.GameObjectFactory {

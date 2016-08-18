@@ -1,3 +1,4 @@
+/// <reference path="../ts/phaser-input-shim.d.ts" />
 declare module Fabrique {
     enum InputType {
         text = 0,
