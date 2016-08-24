@@ -50,39 +50,13 @@ module Fabrique {
             document.body.appendChild(this.element);
         }
 
-        public addKeyUpListener(callback: () => void): void {
+        public addKeyPressListener(callback: () => void): void {
             this.callback = callback;
-            document.addEventListener('keyup', this.callback);
-        }
-
-        /**
-         * Captures the keyboard event on keydown, used to prevent it going from input field to sprite
-         **/
-        public blockKeyDownEvents(): void {
-            document.addEventListener('keydown', this.preventKeyPropagation);
-        }
-
-        /**
-        * To prevent bubbling of keyboard event from input field to sprite
-        **/
-        private preventKeyPropagation(evt: KeyboardEvent): void{
-            if(evt.stopPropagation){
-                evt.stopPropagation();
-            } else {
-                //for IE < 9
-                event.cancelBubble = true;
-            }
-        }
-
-        /**
-         * Remove listener that captures keydown keyboard events
-         **/
-        public unblockKeyDownEvents(): void {
-            document.removeEventListener('keydown', this.preventKeyPropagation);
+            this.element.addEventListener('input', this.callback);
         }
 
         public removeEventListener(): void {
-            document.removeEventListener('keyup', this.callback);
+            this.element.removeEventListener('input', this.callback);
         }
 
         public destroy() {

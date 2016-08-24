@@ -20,6 +20,7 @@ module Fabrique {
         wordWrap?: boolean;
         selectionColor?: string;
         zoom?: boolean;
+        focusOutOnEnter?: boolean;
     }
 
     export class InputField extends Phaser.Sprite {
@@ -49,7 +50,7 @@ module Fabrique {
 
         private windowScale: number = 1;
 
-        public blockInput: boolean = true;
+        //public blockInput: boolean = true;
 
         constructor(game:Phaser.Game, x:number, y:number, inputOptions:InputOptions = {}) {
             super(game, x, y);
@@ -65,6 +66,8 @@ module Fabrique {
             this.inputOptions.fillAlpha = (inputOptions.fillAlpha === undefined) ? 1 : inputOptions.fillAlpha;
             this.inputOptions.selectionColor = inputOptions.selectionColor || 'rgba(179, 212, 253, 0.8)';
             this.inputOptions.zoom = (!game.device.desktop) ? inputOptions.zoom || false : false;
+
+            this.focusOutOnEnter = this.inputOptions.focusOutOnEnter;
 
             //create the input box
             this.box = new InputBox(this.game, inputOptions);
@@ -98,9 +101,7 @@ module Fabrique {
             this.cursor = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding - 2, '|', <Phaser.PhaserTextStyle>{
                 font: inputOptions.font || '14px Arial',
                 fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.cursorColor || '#000000',
-                wordWrap: inputOptions.wordWrap,
-                wordWrapWidth: inputOptions.width
+                fill: inputOptions.cursorColor || '#000000'
             });
             this.cursor.visible = false;
             this.addChild(this.cursor);
@@ -126,17 +127,20 @@ module Fabrique {
             switch (this.inputOptions.align) {
                 case 'left':
                     this.text.anchor.set(0, 0);
-                    this.cursor.x = this.inputOptions.padding + this.getCaretPosition();
+                    this.cursor.x = this.inputOptions.padding + this.getCaretPosition().x;
+                    this.cursor.y = this.getCaretPosition().y;
                     break;
                 case 'center':
                     this.text.anchor.set(0.5, 0);
                     this.text.x += this.inputOptions.width / 2;
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2  - this.text.width / 2  + this.getCaretPosition();
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2  - this.text.width / 2  + this.getCaretPosition().x;
+                    this.cursor.y = this.getCaretPosition().y;
                     break;
                 case 'right':
                     this.text.anchor.set(1, 0);
                     this.text.x += this.inputOptions.width;
                     this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
+                    this.cursor.y = this.getCaretPosition().y;
                     break;
             }
 
@@ -218,9 +222,9 @@ module Fabrique {
         public endFocus() {
             this.domElement.removeEventListener();
 
-            if(this.blockInput === true) {
-                this.domElement.unblockKeyDownEvents();
-            }            
+            //if(this.blockInput === true) {
+              //  this.domElement.unblockKeyDownEvents();
+            //}
             
             this.focus = false;
             if (this.value.length === 0 && null !== this.placeHolder) {
@@ -269,12 +273,12 @@ module Fabrique {
         }
 
         private keyUpProcessor():void {
-            this.domElement.addKeyUpListener(this.keyListener.bind(this));
+            this.domElement.addKeyPressListener(this.keyListener.bind(this));
             this.domElement.focus();
             
-            if(this.blockInput === true) {
-                this.domElement.blockKeyDownEvents();
-            }
+            //if(this.blockInput === true) {
+              //  this.domElement.blockKeyDownEvents();
+            //}
         }
 
         /**
@@ -332,10 +336,12 @@ module Fabrique {
             } else {
                 switch (this.inputOptions.align) {
                     case 'left':
-                        this.cursor.x = this.inputOptions.padding + this.getCaretPosition();
+                        this.cursor.x = this.inputOptions.padding + this.getCaretPosition().x;
+                        this.cursor.y = this.getCaretPosition().y;
                         break;
                     case 'center':
                         this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + this.getCaretPosition();
+                        this.cursor.y = this.getCaretPosition().y;
                         break;
                 }
             }
@@ -346,10 +352,10 @@ module Fabrique {
          *
          * @returns {number}
          */
-        private getCaretPosition() {
-            var caretPosition: number = this.domElement.getCaretPosition();
-            if (-1 === caretPosition) {
-                return this.text.width;
+        private getCaretPosition():any {
+            var caretPosition: any = this.domElement.getCaretPosition();
+            if (-1 === caretPosition.x) {
+                return {x: this.text.width, y:this.text.height};
             }
 
             var text = this.value;
@@ -362,7 +368,7 @@ module Fabrique {
 
             this.offscreenText.setText(text.slice(0, caretPosition));
 
-            return this.offscreenText.width;
+            return {x: this.offscreenText.width, y: this.offscreenText.height - this.cursor.height};
         }
 
         /**
@@ -376,6 +382,7 @@ module Fabrique {
                 localX += this.text.width / 2;
             }
 
+            //TODO: Support multiline text
             var characterWidth: number = this.text.width / this.value.length;
             var index: number  = 0;
             for (let i: number = 0; i < this.value.length; i++) {
