@@ -120,7 +120,6 @@ module Fabrique {
                 font: inputOptions.font || '14px Arial',
                 fontWeight: inputOptions.fontWeight || 'normal',
                 fill: inputOptions.fill || '#000000',
-                wordWrap: inputOptions.wordWrap,
                 wordWrapWidth: inputOptions.width
             });
 
@@ -348,8 +347,8 @@ module Fabrique {
          */
         private getCaretPosition():any {
             var caretPosition: any = this.domElement.getCaretPosition();
-            if (-1 === caretPosition.x) {
-                return {x: this.text.width, y:this.text.height - this.cursor.height};
+            if (-1 === caretPosition) {
+                caretPosition = this.value.length;
             }
 
             var text = this.value;
@@ -360,9 +359,19 @@ module Fabrique {
                 }
             }
 
-            this.offscreenText.setText(text.slice(0, caretPosition));
+            if (this.inputOptions.wordWrap) {
+                //Measure the number of lines down
+                var lines = this.offscreenText.precalculateWordWrap(text.slice(0, caretPosition));
 
-            return {x: this.offscreenText.width, y: this.offscreenText.height - this.cursor.height};
+                //Now just measure the last line
+                this.offscreenText.setText(lines[lines.length - 1]);
+
+                return {x: this.offscreenText.width, y: this.cursor.height * (lines.length - 1)};
+            } else {
+                this.offscreenText.setText(text.slice(0, caretPosition));
+
+                return {x: this.offscreenText.width, y: 0};
+            }
         }
 
         /**
