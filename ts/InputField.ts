@@ -16,7 +16,9 @@ module Fabrique {
         type?: InputType;
         min?: string;
         max?: string;
-        textAlign?: string;
+        align?: string;
+        wordWrap?: boolean;
+        wordWrapWidth?: number;
         selectionColor?: string;
         zoom?: boolean;
     }
@@ -57,7 +59,7 @@ module Fabrique {
             this.inputOptions = inputOptions;
             this.inputOptions.width = inputOptions.width || 150;
             this.inputOptions.padding = inputOptions.padding || 0;
-            this.inputOptions.textAlign = inputOptions.textAlign || 'left';
+            this.inputOptions.align = inputOptions.align || 'left';
             this.inputOptions.type = inputOptions.type || InputType.text;
             this.inputOptions.borderRadius = inputOptions.borderRadius || 0;
             this.inputOptions.height = inputOptions.height || 14;
@@ -75,7 +77,7 @@ module Fabrique {
 
             //Create the hidden dom elements
             this.domElement = new InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(),
-                this.inputOptions.type, this.value);
+                this.inputOptions.type, this.value, this.inputOptions.wordWrap);
             this.domElement.setMax(this.inputOptions.max, this.inputOptions.min);
 
             this.selection = new SelectionHighlight(this.game, this.inputOptions);
@@ -86,7 +88,9 @@ module Fabrique {
                     inputOptions.placeHolder, <Phaser.PhaserTextStyle>{
                     font: inputOptions.font || '14px Arial',
                     fontWeight: inputOptions.fontWeight || 'normal',
-                    fill: inputOptions.placeHolderColor || '#bfbebd'
+                    fill: inputOptions.placeHolderColor || '#bfbebd',
+                    wordWrap: inputOptions.wordWrap,
+                    wordWrapWidth: inputOptions.wordWrapWidth
                 });
                 this.placeHolder.mask = this.textMask;
                 this.addChild(this.placeHolder);
@@ -95,7 +99,9 @@ module Fabrique {
             this.cursor = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding - 2, '|', <Phaser.PhaserTextStyle>{
                 font: inputOptions.font || '14px Arial',
                 fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.cursorColor || '#000000'
+                fill: inputOptions.cursorColor || '#000000',
+                wordWrap: inputOptions.wordWrap,
+                wordWrapWidth: inputOptions.wordWrapWidth
             });
             this.cursor.visible = false;
             this.addChild(this.cursor);
@@ -103,7 +109,9 @@ module Fabrique {
             this.text = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, '', <Phaser.PhaserTextStyle>{
                 font: inputOptions.font || '14px Arial',
                 fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.fill || '#000000'
+                fill: inputOptions.fill || '#000000',
+                wordWrap: inputOptions.wordWrap,
+                wordWrapWidth: inputOptions.wordWrapWidth
             });
             this.text.mask = this.textMask;
             this.addChild(this.text);
@@ -111,10 +119,12 @@ module Fabrique {
             this.offscreenText = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, '', <Phaser.PhaserTextStyle>{
                 font: inputOptions.font || '14px Arial',
                 fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.fill || '#000000'
+                fill: inputOptions.fill || '#000000',
+                wordWrap: inputOptions.wordWrap,
+                wordWrapWidth: inputOptions.wordWrapWidth
             });
 
-            switch (this.inputOptions.textAlign) {
+            switch (this.inputOptions.align) {
                 case 'left':
                     this.text.anchor.set(0, 0);
                     this.cursor.x = this.inputOptions.padding + this.getCaretPosition();
@@ -297,7 +307,7 @@ module Fabrique {
                 this.text.anchor.x = 1;
                 this.text.x = this.inputOptions.padding + this.inputOptions.width;
             } else {
-                switch (this.inputOptions.textAlign) {
+                switch (this.inputOptions.align) {
                     case 'left':
                         this.text.anchor.set(0, 0);
                         this.text.x = this.inputOptions.padding;
@@ -318,10 +328,10 @@ module Fabrique {
          * Updates the position of the caret in the phaser input field
          */
         private updateCursor() {
-            if (this.text.width > this.inputOptions.width || this.inputOptions.textAlign === 'right') {
+            if (this.text.width > this.inputOptions.width || this.inputOptions.align === 'right') {
                 this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
             } else {
-                switch (this.inputOptions.textAlign) {
+                switch (this.inputOptions.align) {
                     case 'left':
                         this.cursor.x = this.inputOptions.padding + this.getCaretPosition();
                         break;
@@ -363,7 +373,7 @@ module Fabrique {
          */
         private setCaretOnclick(e: Phaser.Pointer) {
             var localX: number = (this.text.toLocal(new PIXI.Point(e.x, e.y), this.game.world)).x;
-            if (this.inputOptions.textAlign && this.inputOptions.textAlign === 'center') {
+            if (this.inputOptions.align && this.inputOptions.align === 'center') {
                 localX += this.text.width / 2;
             }
 
@@ -404,7 +414,7 @@ module Fabrique {
 
                 this.selection.updateSelection(this.offscreenText.getBounds());
 
-                switch (this.inputOptions.textAlign) {
+                switch (this.inputOptions.align) {
                     case 'left':
                         this.selection.x = this.inputOptions.padding;
                         break;

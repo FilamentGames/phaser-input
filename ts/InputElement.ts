@@ -7,7 +7,7 @@ module Fabrique {
     }
 
     export class InputElement {
-        private element: HTMLInputElement;
+        private element: HTMLTextAreaElement | HTMLInputElement;
 
         private callback: () => void;
 
@@ -21,26 +21,30 @@ module Fabrique {
 
         public focusOut: Phaser.Signal = new Phaser.Signal();
 
-        constructor(game: Phaser.Game, id: string, type: InputType = InputType.text, value: string = '') {
+        constructor(game: Phaser.Game, id: string, type: InputType = InputType.text, value: string = '', multiline:boolean = false) {
             this.id = id;
             this.type = type;
             this.game = game;
 
-            this.element = document.createElement('input');
+            if (multiline) {
+                this.element = document.createElement('textarea');
+                this.element.type = InputType[type];
+            } else {
+                this.element = document.createElement('input');
+            }
 
             this.element.id = id;
             this.element.style.position = 'absolute';
             this.element.style.top = (-100).toString() + 'px';
             this.element.style.left = (-100).toString() + 'px';
             this.element.value = this.value;
-            this.element.type = InputType[type];
 
 
             this.element.addEventListener('focusin', (): void => {
                 this.focusIn.dispatch();
             });
             this.element.addEventListener('focusout', (): void => {
-                this.focusOut.dispatch()
+                this.focusOut.dispatch();
             });
 
             document.body.appendChild(this.element);
