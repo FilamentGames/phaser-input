@@ -370,10 +370,8 @@ module Fabrique {
                     var line = lines[i];
                     line = line.slice(0, -1);
 
-                    index += line.length;
-
-                    if (index >= caretPosition) {
-                        var lineOffset = line.length - (index - caretPosition);
+                    if (index + line.length >= caretPosition) {
+                        var lineOffset = caretPosition - index;
                         line = line.slice(0, lineOffset);
                         this.text.context.font = this.text.cssFont;
                         let width = this.text.context.measureText(line).width;
@@ -383,11 +381,13 @@ module Fabrique {
                         let width = this.text.context.measureText(line).width;
                         return {x: width, y: this.cursor.height * i};
                     }
+
+                    index += line.length;
                 }
             } else {
                 this.text.context.font = this.text.cssFont;
                 let width = this.text.context.measureText(text.slice(0, caretPosition)).width;
-                return {x: this.text.width, y: 0};
+                return {x: width, y: 0};
             }
         }
 
@@ -515,10 +515,6 @@ module Fabrique {
          * Event fired when a key is pressed, it takes the value from the hidden input field and adds it as its own
          */
         private inputListener(evt: KeyboardEvent) {
-            this.value = this.domElement.value;
-            this.updateText();
-            this.updateCursor();
-            this.updateSelection();
         }
 
         private keyDownListener(evt: KeyboardEvent) {
@@ -529,11 +525,15 @@ module Fabrique {
                 }
             }
 
+            this.value = this.domElement.value;
+            this.updateText();
             this.updateCursor();
             this.updateSelection();
         }
 
         private keyUpListener(evt: KeyboardEvent) {
+            this.value = this.domElement.value;
+            this.updateText();
             this.updateCursor();
             this.updateSelection();
         }
