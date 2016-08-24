@@ -346,6 +346,8 @@ module Fabrique {
          * @returns {number}
          */
         private getCaretPosition():any {
+            //TODO: Position caret at the edge of the textfield if there is more text than can fit visually
+
             var caretPosition: any = this.domElement.getCaretPosition();
             if (-1 === caretPosition) {
                 caretPosition = this.value.length;
@@ -362,9 +364,12 @@ module Fabrique {
             if (this.inputOptions.wordWrap) {
                 //Measure the number of lines down
                 var lines = this.offscreenText.precalculateWordWrap(text.slice(0, caretPosition));
-
+                console.log(lines);
                 //Now just measure the last line
-                this.offscreenText.setText(lines[lines.length - 1]);
+                //For some reason lastLine has an extra space at the end that we don't want.
+                var lastLine = lines[lines.length - 1];
+                lastLine = lastLine.slice(0, -1);
+                this.offscreenText.setText(lastLine);
 
                 return {x: this.offscreenText.width, y: this.cursor.height * (lines.length - 1)};
             } else {
