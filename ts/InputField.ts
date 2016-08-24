@@ -363,7 +363,7 @@ module Fabrique {
 
             if (this.inputOptions.wordWrap) {
                 //Measure the number of lines down
-                var lines = this.offscreenText.precalculateWordWrap(this.value);
+                var lines = this.text.precalculateWordWrap(this.value);
                 var index = 0;
 
                 for (var i = 0; i < lines.length; i++) {
@@ -374,17 +374,20 @@ module Fabrique {
 
                     if (index >= caretPosition) {
                         var lineOffset = line.length - (index - caretPosition);
-                        this.offscreenText.setText(line.slice(0, lineOffset));
-                        return {x: this.offscreenText.width, y: this.cursor.height * i};
+                        line = line.slice(0, lineOffset);
+                        this.text.context.font = this.text.cssFont;
+                        let width = this.text.context.measureText(line).width;
+                        return {x: width, y: this.cursor.height * i};
                     } else if (i == lines.length - 1) { //This is the last line
-                        this.offscreenText.setText(line);
-                        return {x: this.offscreenText.width, y: this.cursor.height * i};
+                        this.text.context.font = this.text.cssFont;
+                        let width = this.text.context.measureText(line).width;
+                        return {x: width, y: this.cursor.height * i};
                     }
                 }
             } else {
-                this.offscreenText.setText(text.slice(0, caretPosition));
-
-                return {x: this.offscreenText.width, y: 0};
+                this.text.context.font = this.text.cssFont;
+                let width = this.text.context.measureText(text.slice(0, caretPosition)).width;
+                return {x: this.text.width, y: 0};
             }
         }
 
@@ -415,7 +418,7 @@ module Fabrique {
             var index:number = 0;
 
             if (this.inputOptions.wordWrap) {
-                var lines = this.offscreenText.precalculateWordWrap(this.value);
+                var lines = this.text.precalculateWordWrap(this.value);
 
                 for (let i:number = 0, lineY:number = this.cursor.height; i < lines.length; i++, lineY += this.cursor.height) {
                     var line = lines[i];
@@ -423,23 +426,24 @@ module Fabrique {
 
                     //The last character in the line is an extra character so don't use it
                     for (let j:number = 0; j < line.length; j++, index++) {
-                        this.offscreenText.setText(line.slice(0, j));
-
-                        if (this.offscreenText.width > localPoint.x && lineY > localPoint.y) {
-                            return index;
+                        this.text.context.font = this.text.cssFont;
+                        let width = this.text.context.measureText(line.slice(0, j)).width;
+                        if (width >= localPoint.x && lineY >= localPoint.y) {
+                            return (index > 0 ? index - 1 : index);
                         }
                     }
 
-                    if (lineY > localPoint.y) {
+                    if (lineY >= localPoint.y) {
                         return index;
                     }
                 }
             } else {
                 for (let j:number = 0; j < this.value.length; j++, index++) {
-                    this.offscreenText.setText(this.value.slice(0, j));
+                    this.text.context.font = this.text.cssFont;
+                    let width = this.text.context.measureText(this.value.slice(0, j)).width;
 
-                    if (this.offscreenText.width > localPoint.x) {
-                        return index;
+                    if (width >= localPoint.x) {
+                        return (index > 0 ? index - 1 : index);
                     }
                 }
             }
