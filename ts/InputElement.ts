@@ -96,13 +96,13 @@ module Fabrique {
 
             if (this.type === InputType.text || this.type === InputType.password) {
                 this.element.maxLength = parseInt(max, 10);
-            } else if (this.type === InputType.number) {
-                this.element.max = max;
+            } else if (this.type === InputType.number && this.element instanceof HTMLInputElement) {
+                (<HTMLInputElement>this.element).max = max;
                 if (min === undefined) {
                     return;
                 }
 
-                this.element.min = min;
+                (<HTMLInputElement>this.element).min = min;
             }
         }
 
