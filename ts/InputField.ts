@@ -333,6 +333,7 @@ module Fabrique {
         private updateCursor() {
             if (this.text.width > this.inputOptions.width || this.inputOptions.align === 'right') {
                 this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
+                this.cursor.y = this.getCaretPosition().y;
             } else {
                 switch (this.inputOptions.align) {
                     case 'left':
@@ -340,7 +341,7 @@ module Fabrique {
                         this.cursor.y = this.getCaretPosition().y;
                         break;
                     case 'center':
-                        this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + this.getCaretPosition();
+                        this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + this.getCaretPosition().x;
                         this.cursor.y = this.getCaretPosition().y;
                         break;
                 }
@@ -355,7 +356,7 @@ module Fabrique {
         private getCaretPosition():any {
             var caretPosition: any = this.domElement.getCaretPosition();
             if (-1 === caretPosition.x) {
-                return {x: this.text.width, y:this.text.height};
+                return {x: this.text.width, y:this.text.height - this.cursor.height};
             }
 
             var text = this.value;
