@@ -437,6 +437,8 @@ module Fabrique {
                     if (lineY >= localPoint.y) {
                         return index;
                     }
+
+                    index++;
                 }
             } else {
                 for (let j:number = 0; j < this.value.length; j++, index++) {

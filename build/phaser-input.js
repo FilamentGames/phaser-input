@@ -1,9 +1,9 @@
 /*!
- * phaser-input - version 1.2.3-filament1 
+ * phaser-input - version 1.2.3-filament4 
  * Adds input boxes to Phaser like CanvasInput, but also works for WebGL and Mobile, made for Phaser only.
  *
  * OrangeGames
- * Build at 18-08-2016
+ * Build at 23-08-2016
  * Released under MIT License 
  */
 
@@ -16,22 +16,28 @@ var Fabrique;
     })(Fabrique.InputType || (Fabrique.InputType = {}));
     var InputType = Fabrique.InputType;
     var InputElement = (function () {
-        function InputElement(game, id, type, value) {
+        function InputElement(game, id, type, value, multiline) {
             var _this = this;
             if (type === void 0) { type = InputType.text; }
             if (value === void 0) { value = ''; }
+            if (multiline === void 0) { multiline = false; }
             this.focusIn = new Phaser.Signal();
             this.focusOut = new Phaser.Signal();
             this.id = id;
             this.type = type;
             this.game = game;
-            this.element = document.createElement('input');
+            if (multiline) {
+                this.element = document.createElement('textarea');
+                this.element.type = InputType[type];
+            }
+            else {
+                this.element = document.createElement('input');
+            }
             this.element.id = id;
             this.element.style.position = 'absolute';
             this.element.style.top = (-100).toString() + 'px';
             this.element.style.left = (-100).toString() + 'px';
             this.element.value = this.value;
-            this.element.type = InputType[type];
             this.element.addEventListener('focusin', function () {
                 _this.focusIn.dispatch();
             });
@@ -40,36 +46,18 @@ var Fabrique;
             });
             document.body.appendChild(this.element);
         }
-        InputElement.prototype.addKeyUpListener = function (callback) {
-            this.callback = callback;
-            document.addEventListener('keyup', this.callback);
+        InputElement.prototype.addEventListeners = function (inputCallback, keyDownCallback, keyUpCallback) {
+            this.inputCallback = inputCallback;
+            this.keyDownCallback = keyDownCallback;
+            this.keyUpCallback = keyUpCallback;
+            this.element.addEventListener('input', this.inputCallback);
+            this.element.addEventListener('keydown', this.keyDownCallback);
+            this.element.addEventListener('keyup', this.keyUpCallback);
         };
-        /**
-         * Captures the keyboard event on keydown, used to prevent it going from input field to sprite
-         **/
-        InputElement.prototype.blockKeyDownEvents = function () {
-            document.addEventListener('keydown', this.preventKeyPropagation);
-        };
-        /**
-        * To prevent bubbling of keyboard event from input field to sprite
-        **/
-        InputElement.prototype.preventKeyPropagation = function (evt) {
-            if (evt.stopPropagation) {
-                evt.stopPropagation();
-            }
-            else {
-                //for IE < 9
-                event.cancelBubble = true;
-            }
-        };
-        /**
-         * Remove listener that captures keydown keyboard events
-         **/
-        InputElement.prototype.unblockKeyDownEvents = function () {
-            document.removeEventListener('keydown', this.preventKeyPropagation);
-        };
-        InputElement.prototype.removeEventListener = function () {
-            document.removeEventListener('keyup', this.callback);
+        InputElement.prototype.removeEventListeners = function () {
+            this.element.removeEventListener('input', this.inputCallback);
+            this.element.removeEventListener('keydown', this.keyDownCallback);
+            this.element.removeEventListener('keyup', this.keyUpCallback);
         };
         InputElement.prototype.destroy = function () {
             document.body.removeChild(this.element);
@@ -81,7 +69,7 @@ var Fabrique;
             if (this.type === InputType.text || this.type === InputType.password) {
                 this.element.maxLength = parseInt(max, 10);
             }
-            else if (this.type === InputType.number) {
+            else if (this.type === InputType.number && this.element instanceof HTMLInputElement) {
                 this.element.max = max;
                 if (min === undefined) {
                     return;
@@ -168,6 +156,7 @@ var Fabrique;
 (function (Fabrique) {
     var InputField = (function (_super) {
         __extends(InputField, _super);
+        //public blockInput: boolean = true;
         function InputField(game, x, y, inputOptions) {
             var _this = this;
             if (inputOptions === void 0) { inputOptions = {}; }
@@ -178,7 +167,6 @@ var Fabrique;
             this.focus = false;
             this.value = '';
             this.windowScale = 1;
-            this.blockInput = true;
             /**
              * Update function makes the cursor blink, it uses two private properties to make it toggle
              *
@@ -190,13 +178,14 @@ var Fabrique;
             this.inputOptions = inputOptions;
             this.inputOptions.width = inputOptions.width || 150;
             this.inputOptions.padding = inputOptions.padding || 0;
-            this.inputOptions.textAlign = inputOptions.textAlign || 'left';
+            this.inputOptions.align = inputOptions.align || 'left';
             this.inputOptions.type = inputOptions.type || Fabrique.InputType.text;
             this.inputOptions.borderRadius = inputOptions.borderRadius || 0;
             this.inputOptions.height = inputOptions.height || 14;
             this.inputOptions.fillAlpha = (inputOptions.fillAlpha === undefined) ? 1 : inputOptions.fillAlpha;
             this.inputOptions.selectionColor = inputOptions.selectionColor || 'rgba(179, 212, 253, 0.8)';
             this.inputOptions.zoom = (!game.device.desktop) ? inputOptions.zoom || false : false;
+            this.focusOutOnEnter = this.inputOptions.focusOutOnEnter;
             //create the input box
             this.box = new Fabrique.InputBox(this.game, inputOptions);
             this.setTexture(this.box.generateTexture());
@@ -204,7 +193,7 @@ var Fabrique;
             this.textMask = new Fabrique.TextMask(this.game, inputOptions);
             this.addChild(this.textMask);
             //Create the hidden dom elements
-            this.domElement = new Fabrique.InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(), this.inputOptions.type, this.value);
+            this.domElement = new Fabrique.InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(), this.inputOptions.type, this.value, this.inputOptions.wordWrap);
             this.domElement.setMax(this.inputOptions.max, this.inputOptions.min);
             this.selection = new Fabrique.SelectionHighlight(this.game, this.inputOptions);
             this.addChild(this.selection);
@@ -212,7 +201,9 @@ var Fabrique;
                 this.placeHolder = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, inputOptions.placeHolder, {
                     font: inputOptions.font || '14px Arial',
                     fontWeight: inputOptions.fontWeight || 'normal',
-                    fill: inputOptions.placeHolderColor || '#bfbebd'
+                    fill: inputOptions.placeHolderColor || '#bfbebd',
+                    wordWrap: inputOptions.wordWrap,
+                    wordWrapWidth: inputOptions.width
                 });
                 this.placeHolder.mask = this.textMask;
                 this.addChild(this.placeHolder);
@@ -227,24 +218,28 @@ var Fabrique;
             this.text = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, '', {
                 font: inputOptions.font || '14px Arial',
                 fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.fill || '#000000'
+                fill: inputOptions.fill || '#000000',
+                wordWrap: inputOptions.wordWrap,
+                wordWrapWidth: inputOptions.width
             });
             this.text.mask = this.textMask;
             this.addChild(this.text);
             this.offscreenText = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, '', {
                 font: inputOptions.font || '14px Arial',
                 fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.fill || '#000000'
+                fill: inputOptions.fill || '#000000',
+                wordWrapWidth: inputOptions.width
             });
-            switch (this.inputOptions.textAlign) {
+            var caretPosition = this.getCaretPosition();
+            switch (this.inputOptions.align) {
                 case 'left':
                     this.text.anchor.set(0, 0);
-                    this.cursor.x = this.inputOptions.padding + this.getCaretPosition();
+                    this.cursor.x = this.inputOptions.padding + caretPosition.x;
                     break;
                 case 'center':
                     this.text.anchor.set(0.5, 0);
                     this.text.x += this.inputOptions.width / 2;
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + this.getCaretPosition();
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + caretPosition.x;
                     break;
                 case 'right':
                     this.text.anchor.set(1, 0);
@@ -252,6 +247,7 @@ var Fabrique;
                     this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
                     break;
             }
+            this.cursor.y = caretPosition.y;
             this.inputEnabled = true;
             this.input.useHandCursor = true;
             this.game.input.onDown.add(this.checkDown, this);
@@ -312,10 +308,7 @@ var Fabrique;
          */
         InputField.prototype.endFocus = function () {
             var _this = this;
-            this.domElement.removeEventListener();
-            if (this.blockInput === true) {
-                this.domElement.unblockKeyDownEvents();
-            }
+            this.domElement.removeEventListeners();
             this.focus = false;
             if (this.value.length === 0 && null !== this.placeHolder) {
                 this.placeHolder.visible = true;
@@ -347,23 +340,20 @@ var Fabrique;
             if (this.game.device.desktop) {
                 //Timeout is a chrome hack
                 setTimeout(function () {
-                    _this.keyUpProcessor();
+                    _this.attachEvents();
                 }, 0);
             }
             else {
-                this.keyUpProcessor();
+                this.attachEvents();
             }
             if (!this.game.device.desktop) {
                 Fabrique.Plugins.InputField.KeyboardOpen = true;
                 Fabrique.Plugins.InputField.onKeyboardOpen.dispatch();
             }
         };
-        InputField.prototype.keyUpProcessor = function () {
-            this.domElement.addKeyUpListener(this.keyListener.bind(this));
+        InputField.prototype.attachEvents = function () {
+            this.domElement.addEventListeners(this.inputListener.bind(this), this.keyDownListener.bind(this), this.keyUpListener.bind(this));
             this.domElement.focus();
-            if (this.blockInput === true) {
-                this.domElement.blockKeyDownEvents();
-            }
         };
         /**
          * Update the text value in the box, and make sure the cursor is positioned correctly
@@ -396,7 +386,7 @@ var Fabrique;
                 this.text.x = this.inputOptions.padding + this.inputOptions.width;
             }
             else {
-                switch (this.inputOptions.textAlign) {
+                switch (this.inputOptions.align) {
                     case 'left':
                         this.text.anchor.set(0, 0);
                         this.text.x = this.inputOptions.padding;
@@ -416,19 +406,19 @@ var Fabrique;
          * Updates the position of the caret in the phaser input field
          */
         InputField.prototype.updateCursor = function () {
-            if (this.text.width > this.inputOptions.width || this.inputOptions.textAlign === 'right') {
-                this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
+            var caretPosition = this.getCaretPosition();
+            switch (this.inputOptions.align) {
+                case 'right':
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
+                    break;
+                case 'left':
+                    this.cursor.x = this.inputOptions.padding + caretPosition.x;
+                    break;
+                case 'center':
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + caretPosition.x;
+                    break;
             }
-            else {
-                switch (this.inputOptions.textAlign) {
-                    case 'left':
-                        this.cursor.x = this.inputOptions.padding + this.getCaretPosition();
-                        break;
-                    case 'center':
-                        this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + this.getCaretPosition();
-                        break;
-                }
-            }
+            this.cursor.y = caretPosition.y;
         };
         /**
          * Fetches the carrot position from the dom element. This one changes when you use the keyboard to navigate the element
@@ -436,19 +426,46 @@ var Fabrique;
          * @returns {number}
          */
         InputField.prototype.getCaretPosition = function () {
+            //TODO: Position caret at the edge of the textfield if there is more text than can fit visually
             var caretPosition = this.domElement.getCaretPosition();
             if (-1 === caretPosition) {
-                return this.text.width;
+                caretPosition = this.value.length;
             }
             var text = this.value;
             if (this.inputOptions.type === Fabrique.InputType.password) {
                 text = '';
-                for (var i = 0; i < this.value.length; i++) {
+                for (var i_1 = 0; i_1 < this.value.length; i_1++) {
                     text += '*';
                 }
             }
-            this.offscreenText.setText(text.slice(0, caretPosition));
-            return this.offscreenText.width;
+            if (this.inputOptions.wordWrap) {
+                //Measure the number of lines down
+                var lines = this.text.precalculateWordWrap(this.value);
+                var index = 0;
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i];
+                    line = line.slice(0, -1);
+                    if (index + line.length >= caretPosition) {
+                        var lineOffset = caretPosition - index;
+                        console.log(caretPosition, i, index, lineOffset);
+                        line = line.slice(0, lineOffset);
+                        this.text.context.font = this.text.cssFont;
+                        var width = this.text.context.measureText(line).width;
+                        return { x: width, y: this.cursor.height * i };
+                    }
+                    else if (i == lines.length - 1) {
+                        this.text.context.font = this.text.cssFont;
+                        var width = this.text.context.measureText(line).width;
+                        return { x: width, y: this.cursor.height * i };
+                    }
+                    index += line.length + 1;
+                }
+            }
+            else {
+                this.text.context.font = this.text.cssFont;
+                var width = this.text.context.measureText(text.slice(0, caretPosition)).width;
+                return { x: width, y: 0 };
+            }
         };
         /**
          * Set the caret when a click was made in the input field
@@ -456,24 +473,46 @@ var Fabrique;
          * @param e
          */
         InputField.prototype.setCaretOnclick = function (e) {
-            var localX = (this.text.toLocal(new PIXI.Point(e.x, e.y), this.game.world)).x;
-            if (this.inputOptions.textAlign && this.inputOptions.textAlign === 'center') {
-                localX += this.text.width / 2;
+            var localPoint = (this.text.toLocal(new PIXI.Point(e.x, e.y), this.game.world));
+            if (this.inputOptions.align && this.inputOptions.align === 'center') {
+                localPoint.x += this.text.width / 2;
             }
-            var characterWidth = this.text.width / this.value.length;
-            var index = 0;
-            for (var i = 0; i < this.value.length; i++) {
-                if (localX >= i * characterWidth && localX <= (i + 1) * characterWidth) {
-                    index = i;
-                    break;
-                }
-            }
-            if (localX > (this.value.length - 1) * characterWidth) {
-                index = this.value.length;
-            }
+            var index = this.getCursorIndex(localPoint);
             this.startFocus();
             this.domElement.setCaretPosition(index);
             this.updateCursor();
+        };
+        InputField.prototype.getCursorIndex = function (localPoint) {
+            var index = 0;
+            if (this.inputOptions.wordWrap) {
+                var lines = this.text.precalculateWordWrap(this.value);
+                for (var i = 0, lineY = this.cursor.height; i < lines.length; i++, lineY += this.cursor.height) {
+                    var line = lines[i];
+                    line = line.slice(0, -1);
+                    //The last character in the line is an extra character so don't use it
+                    for (var j = 0; j < line.length; j++, index++) {
+                        this.text.context.font = this.text.cssFont;
+                        var width = this.text.context.measureText(line.slice(0, j)).width;
+                        if (width >= localPoint.x && lineY >= localPoint.y) {
+                            return (index > 0 ? index - 1 : index);
+                        }
+                    }
+                    if (lineY >= localPoint.y) {
+                        return index;
+                    }
+                    index++;
+                }
+            }
+            else {
+                for (var j = 0; j < this.value.length; j++, index++) {
+                    this.text.context.font = this.text.cssFont;
+                    var width = this.text.context.measureText(this.value.slice(0, j)).width;
+                    if (width >= localPoint.x) {
+                        return (index > 0 ? index - 1 : index);
+                    }
+                }
+            }
+            return index;
         };
         /**
          * This checks if a select has been made, and if so highlight it with blue
@@ -489,8 +528,10 @@ var Fabrique;
                 }
                 text = text.substring(this.domElement.caretStart, this.domElement.caretEnd);
                 this.offscreenText.setText(text);
+                //TODO: Handle multiline selection
+                //TODO: Handle keyboard selection
                 this.selection.updateSelection(this.offscreenText.getBounds());
-                switch (this.inputOptions.textAlign) {
+                switch (this.inputOptions.align) {
                     case 'left':
                         this.selection.x = this.inputOptions.padding;
                         break;
@@ -530,18 +571,25 @@ var Fabrique;
         /**
          * Event fired when a key is pressed, it takes the value from the hidden input field and adds it as its own
          */
-        InputField.prototype.keyListener = function (evt) {
-            this.value = this.domElement.value;
+        InputField.prototype.inputListener = function (evt) {
+        };
+        InputField.prototype.keyDownListener = function (evt) {
             if (evt.keyCode === 13) {
                 if (this.focusOutOnEnter) {
                     this.endFocus();
+                    return;
                 }
-                return;
             }
+            this.value = this.domElement.value;
             this.updateText();
             this.updateCursor();
             this.updateSelection();
-            evt.preventDefault();
+        };
+        InputField.prototype.keyUpListener = function (evt) {
+            this.value = this.domElement.value;
+            this.updateText();
+            this.updateCursor();
+            this.updateSelection();
         };
         /**
          * We overwrite the destroy method because we want to delete the (hidden) dom element when the inputField was removed

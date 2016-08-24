@@ -7,27 +7,17 @@ declare module Fabrique {
     }
     class InputElement {
         private element;
-        private callback;
+        private inputCallback;
+        private keyDownCallback;
+        private keyUpCallback;
         private type;
         private id;
         private game;
         focusIn: Phaser.Signal;
         focusOut: Phaser.Signal;
-        constructor(game: Phaser.Game, id: string, type?: InputType, value?: string);
-        addKeyUpListener(callback: () => void): void;
-        /**
-         * Captures the keyboard event on keydown, used to prevent it going from input field to sprite
-         **/
-        blockKeyDownEvents(): void;
-        /**
-        * To prevent bubbling of keyboard event from input field to sprite
-        **/
-        private preventKeyPropagation(evt);
-        /**
-         * Remove listener that captures keydown keyboard events
-         **/
-        unblockKeyDownEvents(): void;
-        removeEventListener(): void;
+        constructor(game: Phaser.Game, id: string, type?: InputType, value?: string, multiline?: boolean);
+        addEventListeners(inputCallback: () => void, keyDownCallback: () => void, keyUpCallback: () => void): void;
+        removeEventListeners(): void;
         destroy(): void;
         setMax(max: string, min?: string): void;
         value: string;
@@ -57,9 +47,11 @@ declare module Fabrique {
         type?: InputType;
         min?: string;
         max?: string;
-        textAlign?: string;
+        align?: string;
+        wordWrap?: boolean;
         selectionColor?: string;
         zoom?: boolean;
+        focusOutOnEnter?: boolean;
     }
     class InputField extends Phaser.Sprite {
         focusOutOnEnter: boolean;
@@ -75,7 +67,6 @@ declare module Fabrique {
         private domElement;
         private selection;
         private windowScale;
-        blockInput: boolean;
         constructor(game: Phaser.Game, x: number, y: number, inputOptions?: InputOptions);
         /**
          * This is a generic input down handler for the game.
@@ -103,7 +94,7 @@ declare module Fabrique {
          *
          */
         startFocus(): void;
-        private keyUpProcessor();
+        private attachEvents();
         /**
          * Update the text value in the box, and make sure the cursor is positioned correctly
          */
@@ -124,6 +115,7 @@ declare module Fabrique {
          * @param e
          */
         private setCaretOnclick(e);
+        private getCursorIndex(localPoint);
         /**
          * This checks if a select has been made, and if so highlight it with blue
          */
@@ -133,7 +125,9 @@ declare module Fabrique {
         /**
          * Event fired when a key is pressed, it takes the value from the hidden input field and adds it as its own
          */
-        private keyListener(evt);
+        private inputListener(evt);
+        private keyDownListener(evt);
+        private keyUpListener(evt);
         /**
          * We overwrite the destroy method because we want to delete the (hidden) dom element when the inputField was removed
          */
