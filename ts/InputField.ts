@@ -364,7 +364,6 @@ module Fabrique {
             if (this.inputOptions.wordWrap) {
                 //Measure the number of lines down
                 var lines = this.offscreenText.precalculateWordWrap(text.slice(0, caretPosition));
-                console.log(lines);
                 //Now just measure the last line
                 //For some reason lastLine has an extra space at the end that we don't want.
                 var lastLine = lines[lines.length - 1];
@@ -385,30 +384,52 @@ module Fabrique {
          * @param e
          */
         private setCaretOnclick(e: Phaser.Pointer) {
-            var localX: number = (this.text.toLocal(new PIXI.Point(e.x, e.y), this.game.world)).x;
+            var localPoint: PIXI.Point = (this.text.toLocal(new PIXI.Point(e.x, e.y), this.game.world));
+
             if (this.inputOptions.align && this.inputOptions.align === 'center') {
-                localX += this.text.width / 2;
+                localPoint.x += this.text.width / 2;
             }
 
-            //TODO: Support multiline text
-            var characterWidth: number = this.text.width / this.value.length;
-            var index: number  = 0;
-            for (let i: number = 0; i < this.value.length; i++) {
-                if (localX >= i * characterWidth && localX <= (i + 1) * characterWidth) {
-                    index = i;
-                    break;
-                }
-            }
 
-            if (localX > (this.value.length - 1) * characterWidth) {
-                index = this.value.length;
-            }
+            var index = this.getCursorIndex(localPoint);
+
 
             this.startFocus();
 
             this.domElement.setCaretPosition(index);
 
             this.updateCursor();
+        }
+
+        private getCursorIndex(localPoint:PIXI.Point):number {
+            var index:number = 0;
+
+            if (this.inputOptions.wordWrap) {
+                var lines = this.offscreenText.precalculateWordWrap(this.value);
+
+                for (let i:number = 0, lineY:number = this.cursor.height; i < lines.length; i++, lineY += this.cursor.height) {
+                    var line = lines[i];
+
+                    //The last character in the line is an extra character so don't use it
+                    for (let j:number = 0; j < line.length; j++, index++) {
+                        this.offscreenText.setText(line.slice(0, j));
+
+                        if (this.offscreenText.width > localPoint.x && lineY > localPoint.y) {
+                            return index;
+                        }
+                    }
+                }
+            } else {
+                for (let j:number = 0; j < this.value.length; j++, index++) {
+                    this.offscreenText.setText(this.value.slice(0, j));
+
+                    if (this.offscreenText.width > localPoint.x) {
+                        return index;
+                    }
+                }
+            }
+
+            return index;
         }
 
         /**
