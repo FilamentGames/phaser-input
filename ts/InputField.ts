@@ -372,6 +372,7 @@ module Fabrique {
 
                     if (index + line.length >= caretPosition) {
                         var lineOffset = caretPosition - index;
+                        console.log(caretPosition, i, index, lineOffset);
                         line = line.slice(0, lineOffset);
                         this.text.context.font = this.text.cssFont;
                         let width = this.text.context.measureText(line).width;
@@ -382,7 +383,7 @@ module Fabrique {
                         return {x: width, y: this.cursor.height * i};
                     }
 
-                    index += line.length;
+                    index += line.length + 1;
                 }
             } else {
                 this.text.context.font = this.text.cssFont;
