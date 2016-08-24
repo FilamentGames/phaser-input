@@ -18,7 +18,6 @@ module Fabrique {
         max?: string;
         align?: string;
         wordWrap?: boolean;
-        wordWrapWidth?: number;
         selectionColor?: string;
         zoom?: boolean;
     }
@@ -90,7 +89,7 @@ module Fabrique {
                     fontWeight: inputOptions.fontWeight || 'normal',
                     fill: inputOptions.placeHolderColor || '#bfbebd',
                     wordWrap: inputOptions.wordWrap,
-                    wordWrapWidth: inputOptions.wordWrapWidth
+                    wordWrapWidth: inputOptions.width
                 });
                 this.placeHolder.mask = this.textMask;
                 this.addChild(this.placeHolder);
@@ -101,7 +100,7 @@ module Fabrique {
                 fontWeight: inputOptions.fontWeight || 'normal',
                 fill: inputOptions.cursorColor || '#000000',
                 wordWrap: inputOptions.wordWrap,
-                wordWrapWidth: inputOptions.wordWrapWidth
+                wordWrapWidth: inputOptions.width
             });
             this.cursor.visible = false;
             this.addChild(this.cursor);
@@ -111,7 +110,7 @@ module Fabrique {
                 fontWeight: inputOptions.fontWeight || 'normal',
                 fill: inputOptions.fill || '#000000',
                 wordWrap: inputOptions.wordWrap,
-                wordWrapWidth: inputOptions.wordWrapWidth
+                wordWrapWidth: inputOptions.width
             });
             this.text.mask = this.textMask;
             this.addChild(this.text);
@@ -121,7 +120,7 @@ module Fabrique {
                 fontWeight: inputOptions.fontWeight || 'normal',
                 fill: inputOptions.fill || '#000000',
                 wordWrap: inputOptions.wordWrap,
-                wordWrapWidth: inputOptions.wordWrapWidth
+                wordWrapWidth: inputOptions.width
             });
 
             switch (this.inputOptions.align) {
