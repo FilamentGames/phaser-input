@@ -376,7 +376,7 @@ module Fabrique {
                         var lineOffset = line.length - (index - caretPosition);
                         this.offscreenText.setText(line.slice(0, lineOffset));
                         return {x: this.offscreenText.width, y: this.cursor.height * i};
-                    } else if (i == lines.length - 1) { //This is the last lien
+                    } else if (i == lines.length - 1) { //This is the last line
                         this.offscreenText.setText(line);
                         return {x: this.offscreenText.width, y: this.cursor.height * i};
                     }
@@ -419,6 +419,7 @@ module Fabrique {
 
                 for (let i:number = 0, lineY:number = this.cursor.height; i < lines.length; i++, lineY += this.cursor.height) {
                     var line = lines[i];
+                    line = line.slice(0, -1);
 
                     //The last character in the line is an extra character so don't use it
                     for (let j:number = 0; j < line.length; j++, index++) {
@@ -427,6 +428,10 @@ module Fabrique {
                         if (this.offscreenText.width > localPoint.x && lineY > localPoint.y) {
                             return index;
                         }
+                    }
+
+                    if (lineY > localPoint.y) {
+                        return index;
                     }
                 }
             } else {
