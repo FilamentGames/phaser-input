@@ -124,25 +124,26 @@ module Fabrique {
                 wordWrapWidth: inputOptions.width
             });
 
+            var caretPosition = this.getCaretPosition();
+
             switch (this.inputOptions.align) {
                 case 'left':
                     this.text.anchor.set(0, 0);
-                    this.cursor.x = this.inputOptions.padding + this.getCaretPosition().x;
-                    this.cursor.y = this.getCaretPosition().y;
+                    this.cursor.x = this.inputOptions.padding + caretPosition.x;
                     break;
                 case 'center':
                     this.text.anchor.set(0.5, 0);
                     this.text.x += this.inputOptions.width / 2;
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2  - this.text.width / 2  + this.getCaretPosition().x;
-                    this.cursor.y = this.getCaretPosition().y;
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2  - this.text.width / 2  + caretPosition.x;
                     break;
                 case 'right':
                     this.text.anchor.set(1, 0);
                     this.text.x += this.inputOptions.width;
                     this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
-                    this.cursor.y = this.getCaretPosition().y;
                     break;
             }
+
+            this.cursor.y = caretPosition.y;
 
             this.inputEnabled = true;
             this.input.useHandCursor = true;
@@ -331,21 +332,21 @@ module Fabrique {
          * Updates the position of the caret in the phaser input field
          */
         private updateCursor() {
-            if (this.text.width > this.inputOptions.width || this.inputOptions.align === 'right') {
-                this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
-                this.cursor.y = this.getCaretPosition().y;
-            } else {
-                switch (this.inputOptions.align) {
-                    case 'left':
-                        this.cursor.x = this.inputOptions.padding + this.getCaretPosition().x;
-                        this.cursor.y = this.getCaretPosition().y;
-                        break;
-                    case 'center':
-                        this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + this.getCaretPosition().x;
-                        this.cursor.y = this.getCaretPosition().y;
-                        break;
-                }
+            var caretPosition = this.getCaretPosition();
+
+            switch (this.inputOptions.align) {
+                case 'right':
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
+                    break;
+                case 'left':
+                    this.cursor.x = this.inputOptions.padding + caretPosition.x;
+                    break;
+                case 'center':
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + caretPosition.x;
+                    break;
             }
+
+            this.cursor.y = caretPosition.y;
         }
 
         /**
