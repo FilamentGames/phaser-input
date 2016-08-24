@@ -363,14 +363,24 @@ module Fabrique {
 
             if (this.inputOptions.wordWrap) {
                 //Measure the number of lines down
-                var lines = this.offscreenText.precalculateWordWrap(text.slice(0, caretPosition));
-                //Now just measure the last line
-                //For some reason lastLine has an extra space at the end that we don't want.
-                var lastLine = lines[lines.length - 1];
-                lastLine = lastLine.slice(0, -1);
-                this.offscreenText.setText(lastLine);
+                var lines = this.offscreenText.precalculateWordWrap(this.value);
+                var index = 0;
 
-                return {x: this.offscreenText.width, y: this.cursor.height * (lines.length - 1)};
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i];
+                    line = line.slice(0, -1);
+
+                    index += line.length;
+
+                    if (index >= caretPosition) {
+                        var lineOffset = line.length - (index - caretPosition);
+                        this.offscreenText.setText(line.slice(0, lineOffset));
+                        return {x: this.offscreenText.width, y: this.cursor.height * i};
+                    } else if (i == lines.length - 1) { //This is the last lien
+                        this.offscreenText.setText(line);
+                        return {x: this.offscreenText.width, y: this.cursor.height * i};
+                    }
+                }
             } else {
                 this.offscreenText.setText(text.slice(0, caretPosition));
 
