@@ -221,12 +221,8 @@ module Fabrique {
          * Focus is lost on the input element, we disable the cursor and remove the hidden input element
          */
         public endFocus() {
-            this.domElement.removeEventListener();
+            this.domElement.removeEventListeners();
 
-            //if(this.blockInput === true) {
-              //  this.domElement.unblockKeyDownEvents();
-            //}
-            
             this.focus = false;
             if (this.value.length === 0 && null !== this.placeHolder) {
                 this.placeHolder.visible = true;
@@ -261,10 +257,10 @@ module Fabrique {
             if (this.game.device.desktop) {
                 //Timeout is a chrome hack
                 setTimeout(() => {
-                    this.keyUpProcessor();
+                    this.attachEvents();
                 }, 0);
             } else {
-                this.keyUpProcessor();
+                this.attachEvents();
             }
 
             if (!this.game.device.desktop) {
@@ -273,13 +269,9 @@ module Fabrique {
             }
         }
 
-        private keyUpProcessor():void {
-            this.domElement.addKeyPressListener(this.keyListener.bind(this));
+        private attachEvents():void {
+            this.domElement.addEventListeners(this.inputListener.bind(this), this.keyDownListener.bind(this), this.keyUpListener.bind(this));
             this.domElement.focus();
-            
-            //if(this.blockInput === true) {
-              //  this.domElement.blockKeyDownEvents();
-            //}
         }
 
         /**
@@ -420,6 +412,8 @@ module Fabrique {
                 text = text.substring(this.domElement.caretStart, this.domElement.caretEnd);
                 this.offscreenText.setText(text);
 
+                //TODO: Handle multiline selection
+                //TODO: Handle keyboard selection
                 this.selection.updateSelection(this.offscreenText.getBounds());
 
                 switch (this.inputOptions.align) {
@@ -466,22 +460,28 @@ module Fabrique {
         /**
          * Event fired when a key is pressed, it takes the value from the hidden input field and adds it as its own
          */
-        private keyListener(evt: KeyboardEvent)
-        {
+        private inputListener(evt: KeyboardEvent) {
             this.value = this.domElement.value;
-
-            if (evt.keyCode === 13) {
-                if(this.focusOutOnEnter) {
-                    this.endFocus();
-                }
-                return;
-            }
-
             this.updateText();
             this.updateCursor();
             this.updateSelection();
+        }
 
-            evt.preventDefault();
+        private keyDownListener(evt: KeyboardEvent) {
+            if (evt.keyCode === 13) {
+                if(this.focusOutOnEnter) {
+                    this.endFocus();
+                    return;
+                }
+            }
+
+            this.updateCursor();
+            this.updateSelection();
+        }
+
+        private keyUpListener(evt: KeyboardEvent) {
+            this.updateCursor();
+            this.updateSelection();
         }
 
         /**

@@ -9,7 +9,11 @@ module Fabrique {
     export class InputElement {
         private element: HTMLTextAreaElement | HTMLInputElement;
 
-        private callback: () => void;
+        private inputCallback: () => void;
+
+        private keyDownCallback: () => void;
+
+        private keyUpCallback: () => void;
 
         private type: InputType;
 
@@ -50,13 +54,19 @@ module Fabrique {
             document.body.appendChild(this.element);
         }
 
-        public addKeyPressListener(callback: () => void): void {
-            this.callback = callback;
-            this.element.addEventListener('input', this.callback);
+        public addEventListeners(inputCallback: () => void, keyDownCallback: () => void, keyUpCallback: () => void): void {
+            this.inputCallback = inputCallback;
+            this.keyDownCallback = keyDownCallback;
+            this.keyUpCallback = keyUpCallback;
+            this.element.addEventListener('input', this.inputCallback);
+            this.element.addEventListener('keydown', this.keyDownCallback);
+            this.element.addEventListener('keyup', this.keyUpCallback);
         }
 
-        public removeEventListener(): void {
-            this.element.removeEventListener('input', this.callback);
+        public removeEventListeners(): void {
+            this.element.removeEventListener('input', this.inputCallback);
+            this.element.removeEventListener('keydown', this.keyDownCallback);
+            this.element.removeEventListener('keyup', this.keyUpCallback);
         }
 
         public destroy() {
