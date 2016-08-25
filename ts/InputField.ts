@@ -25,7 +25,6 @@ module Fabrique {
         fill?: any;
         align?: string;
         wordWrap?: boolean;
-        wordWrapWidth?: number;
     }
 
     export class InputField extends Phaser.Sprite {
