@@ -329,19 +329,8 @@ module Fabrique {
         private updateCursor() {
             var caretPosition = this.getCaretPosition();
 
-            switch (this.inputOptions.align) {
-                case 'right':
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
-                    break;
-                case 'left':
-                    this.cursor.x = this.inputOptions.padding + caretPosition.x;
-                    break;
-                case 'center':
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + caretPosition.x;
-                    break;
-            }
-
-            this.cursor.y = caretPosition.y;
+            this.cursor.x = this.inputOptions.padding + caretPosition.x - this.domElement.scrollLeft;
+            this.cursor.y = caretPosition.y - this.domElement.scrollTop;
         }
 
         /**
