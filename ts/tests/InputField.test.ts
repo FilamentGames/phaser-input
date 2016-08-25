@@ -82,7 +82,7 @@ describe("InputField", () => {
         }, true);
     }, 10000);
 
-    fit("can display a single line input field with a really long line", (cb) => {
+    it("can display a single line input field with a really long line", (cb) => {
         var game = new Phaser.Game({
             width: "100%",
             height: "100%"
@@ -105,10 +105,10 @@ describe("InputField", () => {
                 setTimeout(function () {
                     game.destroy();
                     cb();
-                }, 60000);
+                }, 5000);
             }
         }, true);
-    }, 120000);
+    }, 10000);
 
     it("can display a multiline input field with a placeholder", (cb) => {
         var game = new Phaser.Game({
@@ -159,10 +159,10 @@ describe("InputField", () => {
                 setTimeout(function () {
                     game.destroy();
                     cb();
-                }, 60000);
+                }, 5000);
             }
         }, true);
-    }, 120000);
+    }, 10000);
 
     it("can wrap text correctly in a multiline text field", (cb) => {
         var game = new Phaser.Game({
@@ -199,8 +199,8 @@ describe("InputField", () => {
                 setTimeout(function () {
                     game.destroy();
                     cb();
-                }, 60000);
+                }, 5000);
             }
         }, true);
-    }, 120000);
+    }, 10000);
 });
