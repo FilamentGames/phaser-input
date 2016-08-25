@@ -32,9 +32,9 @@ module Fabrique {
 
             if (multiline) {
                 this.element = document.createElement('textarea');
-                this.element.type = InputType[type];
             } else {
                 this.element = document.createElement('input');
+                this.element.type = InputType[type];
             }
 
             this.element.id = id;
