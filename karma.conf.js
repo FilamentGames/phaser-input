@@ -24,22 +24,16 @@ module.exports = function (config) {
 		typescriptPreprocessor: {
 			// options passed to the typescript compiler
 			options: {
-				sourceMap: false,
-				target: 'ES5',
-				module: 'amd',
-				delaration: true,
 				compilerOptions: {
-					moduleResolution: "node"
-				},
-				references: [
-					'typings/tsd.d.ts'
-				],
-				noImplicitAny: true
+					target: 'es5',
+					sourceMap: true,
+					moduleResolution: "node",
+					references: [
+						'typings/tsd.d.ts'
+					],
+					noImplicitAny: true
+				}
 			},
-			// transforming the filenames
-			transformPath: function(path) {
-				return path.replace(/\.ts$/, '.js');
-			}
 		},
 
 		// use dots reporter, as travis terminal does not support escaping sequences

@@ -60,7 +60,7 @@ module Fabrique {
             this.inputOptions.width = inputOptions.width || 150;
             this.inputOptions.padding = inputOptions.padding || 0;
             this.inputOptions.align = inputOptions.align || 'left';
-            this.inputOptions.type = inputOptions.type || InputType.text;
+            this.inputOptions.type = inputOptions.type || Fabrique.InputType.text;
             this.inputOptions.borderRadius = inputOptions.borderRadius || 0;
             this.inputOptions.height = inputOptions.height || 14;
             this.inputOptions.fillAlpha = (inputOptions.fillAlpha === undefined) ? 1 : inputOptions.fillAlpha;
@@ -70,19 +70,19 @@ module Fabrique {
             this.focusOutOnEnter = this.inputOptions.focusOutOnEnter;
 
             //create the input box
-            this.box = new InputBox(this.game, inputOptions);
+            this.box = new Fabrique.InputBox(this.game, inputOptions);
             this.setTexture(this.box.generateTexture());
 
             //create the mask that will be used for the texts
-            this.textMask = new TextMask(this.game, inputOptions);
+            this.textMask = new Fabrique.TextMask(this.game, inputOptions);
             this.addChild(this.textMask);
 
             //Create the hidden dom elements
-            this.domElement = new InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(),
+            this.domElement = new Fabrique.InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(),
                 this.inputOptions.type, this.value, this.inputOptions.wordWrap);
             this.domElement.setMax(this.inputOptions.max, this.inputOptions.min);
 
-            this.selection = new SelectionHighlight(this.game, this.inputOptions);
+            this.selection = new Fabrique.SelectionHighlight(this.game, this.inputOptions);
             this.addChild(this.selection);
 
             if (inputOptions.placeHolder && inputOptions.placeHolder.length > 0) {
@@ -279,11 +279,11 @@ module Fabrique {
         private updateText()
         {
             var text: string = '';
-            if (this.inputOptions.type === InputType.password) {
+            if (this.inputOptions.type === Fabrique.InputType.password) {
                 for (let i = 0; i < this.value.length; i++) {
                     text += '*';
                 }
-            }else if (this.inputOptions.type === InputType.number) {
+            }else if (this.inputOptions.type === Fabrique.InputType.number) {
                 var val = parseInt(this.value);
                 if (val < parseInt(this.inputOptions.min)) {
                     text = this.inputOptions.min;
@@ -354,7 +354,7 @@ module Fabrique {
             }
 
             var text = this.value;
-            if (this.inputOptions.type === InputType.password) {
+            if (this.inputOptions.type === Fabrique.InputType.password) {
                 text = '';
                 for (let i = 0; i < this.value.length; i++) {
                     text += '*';
@@ -460,7 +460,7 @@ module Fabrique {
         private updateSelection(): void {
             if (this.domElement.hasSelection) {
                 var text = this.value;
-                if (this.inputOptions.type === InputType.password) {
+                if (this.inputOptions.type === Fabrique.InputType.password) {
                     text = '';
                     for (let i = 0; i < this.value.length; i++) {
                         text += '*';

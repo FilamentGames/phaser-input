@@ -30,9 +30,7 @@ module.exports = function (grunt) {
                 target: 'es5',
                 sourceMap: true,
                 declaration: true,
-                compilerOptions: {
-                    moduleResolution: "node"
-                },
+                moduleResolution: "node",
                 references: [
                     'typings/tsd.d.ts'
                 ],

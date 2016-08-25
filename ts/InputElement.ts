@@ -25,7 +25,7 @@ module Fabrique {
 
         public focusOut: Phaser.Signal = new Phaser.Signal();
 
-        constructor(game: Phaser.Game, id: string, type: InputType = InputType.text, value: string = '', multiline:boolean = false) {
+        constructor(game: Phaser.Game, id: string, type: InputType = Fabrique.InputType.text, value: string = '', multiline:boolean = false) {
             this.id = id;
             this.type = type;
             this.game = game;
