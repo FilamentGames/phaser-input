@@ -154,7 +154,7 @@ module Fabrique {
             this.game.input.onDown.add(this.checkDown, this);
             this.domElement.focusOut.add((): void => {
 
-                if (Plugins.InputField.KeyboardOpen) {
+                if (Fabrique.Plugins.InputField.KeyboardOpen) {
 
                     this.endFocus();
                     if (this.inputOptions.zoom) {
@@ -242,8 +242,8 @@ module Fabrique {
             }
 
             if (!this.game.device.desktop) {
-                Plugins.InputField.KeyboardOpen = false;
-                Plugins.InputField.onKeyboardClose.dispatch();
+                Fabrique.Plugins.InputField.KeyboardOpen = false;
+                Fabrique.Plugins.InputField.onKeyboardClose.dispatch();
             }
         }
 
@@ -267,8 +267,8 @@ module Fabrique {
             }
 
             if (!this.game.device.desktop) {
-                Plugins.InputField.KeyboardOpen = true;
-                Plugins.InputField.onKeyboardOpen.dispatch();
+                Fabrique.Plugins.InputField.KeyboardOpen = true;
+                Fabrique.Plugins.InputField.onKeyboardOpen.dispatch();
             }
         }
 
@@ -491,7 +491,7 @@ module Fabrique {
         }
         
         private zoomIn(): void {
-            if (Plugins.InputField.Zoomed) {
+            if (Fabrique.Plugins.InputField.Zoomed) {
                 return;
             }
 
@@ -505,17 +505,17 @@ module Fabrique {
             let offsetX: number = ((this.game.width - bounds.width * 1.5) / 2) / this.windowScale;
             this.game.world.scale.set(this.game.world.scale.x * this.windowScale, this.game.world.scale.y * this.windowScale);
             this.game.world.pivot.set(bounds.x - offsetX, bounds.y - this.inputOptions.padding * 2);
-            Plugins.InputField.Zoomed = true;
+            Fabrique.Plugins.InputField.Zoomed = true;
         }
 
         private zoomOut(): void {
-            if (!Plugins.InputField.Zoomed) {
+            if (!Fabrique.Plugins.InputField.Zoomed) {
                 return;
             }
 
             this.game.world.scale.set(this.game.world.scale.x / this.windowScale, this.game.world.scale.y / this.windowScale);
             this.game.world.pivot.set(0, 0);
-            Plugins.InputField.Zoomed = false;
+            Fabrique.Plugins.InputField.Zoomed = false;
         }
 
         /**
