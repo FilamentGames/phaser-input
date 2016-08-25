@@ -41,8 +41,8 @@ module Fabrique {
 
             this.element.id = id;
             this.element.style.position = 'absolute';
-            this.element.style.top = (-100).toString() + 'px';
-            this.element.style.left = (-100).toString() + 'px';
+            this.element.style.top = (-1000).toString() + 'px';
+            this.element.style.left = (-1000).toString() + 'px';
             this.element.style.width = options.width + 'px';
             this.element.style.height = options.height + 'px';
             this.element.style.font = options.font;
