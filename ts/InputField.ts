@@ -368,7 +368,6 @@ module Fabrique {
 
                 for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
-                    line = line.slice(0, -1);
 
                     if (index + line.length >= caretPosition) {
                         var lineOffset = caretPosition - index;
@@ -411,7 +410,6 @@ module Fabrique {
 
                 for (let i:number = 0, lineY:number = this.cursor.height; i < lines.length; i++, lineY += this.cursor.height) {
                     var line = lines[i];
-                    line = line.slice(0, -1);
 
                     //The last character in the line is an extra character so don't use it
                     for (let j:number = 0; j < line.length; j++, index++) {
