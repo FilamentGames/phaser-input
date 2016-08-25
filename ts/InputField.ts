@@ -327,8 +327,6 @@ module Fabrique {
          * @returns {number}
          */
         private getCaretPosition():any {
-            //TODO: Position caret at the edge of the textfield if there is more text than can fit visually
-
             var caretPosition: any = this.domElement.caretPosition;
             if (-1 === caretPosition) {
                 caretPosition = this.value.length;
