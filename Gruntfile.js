@@ -30,14 +30,16 @@ module.exports = function (grunt) {
                 target: 'es5',
                 sourceMap: true,
                 declaration: true,
+                compilerOptions: {
+                    moduleResolution: "node"
+                },
                 references: [
-                    'node_modules/phaser/typescript/pixi.d.ts',
-                    'node_modules/phaser/typescript/phaser.d.ts'
+                    'typings/tsd.d.ts'
                 ],
                 noImplicitAny: true
             },
             dist: {
-                src: ['ts/**/*.ts'],
+                src: ['ts/**/*.ts', '!ts/**/*.test.ts'],
                 dest: 'build/<%= pkg.name %>.js'
             }
         },

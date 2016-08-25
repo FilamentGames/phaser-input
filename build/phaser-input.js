@@ -3,7 +3,7 @@
  * Adds input boxes to Phaser like CanvasInput, but also works for WebGL and Mobile, made for Phaser only.
  *
  * OrangeGames
- * Build at 23-08-2016
+ * Build at 25-08-2016
  * Released under MIT License 
  */
 
