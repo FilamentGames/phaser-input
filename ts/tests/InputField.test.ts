@@ -82,6 +82,33 @@ describe("InputField", () => {
         }, true);
     }, 10000);
 
+    fit("can display a single line input field with a really long line", (cb) => {
+        var game = new Phaser.Game({
+            width: "100%",
+            height: "100%"
+        });
+        (<any>window).game = game;
+        game.state.add("test", {
+            init: function () {
+                game.plugins.add(Fabrique.Plugins.InputField);
+            },
+            create: function () {
+                var input = game.add.inputField(50, 50, {
+                    width: 250,
+                    placeHolder: "Enter text here",
+                    height: 22
+                });
+
+                input.setText("LoremipsumdolorsitametconsecteturadipiscingelitEtiamsedduiutsapienpharetrascelerisqueMaurisintortornunc");
+
+                setTimeout(function () {
+                    game.destroy();
+                    cb();
+                }, 60000);
+            }
+        }, true);
+    }, 120000);
+
     it("can display a multiline input field with a placeholder", (cb) => {
         var game = new Phaser.Game({
             width: "100%",
@@ -107,6 +134,34 @@ describe("InputField", () => {
             }
         }, true);
     }, 10000);
+
+    it("can display a multiline input field with a really long line", (cb) => {
+        var game = new Phaser.Game({
+            width: "100%",
+            height: "100%"
+        });
+        (<any>window).game = game;
+        game.state.add("test", {
+            init: function () {
+                game.plugins.add(Fabrique.Plugins.InputField);
+            },
+            create: function () {
+                var input = game.add.inputField(50, 50, {
+                    width: 250,
+                    placeHolder: "Enter text here",
+                    height: 250,
+                    wordWrap: true
+                });
+
+                input.setText("LoremipsumdolorsitametconsecteturadipiscingelitEtiamsedduiutsapienpharetrascelerisqueMaurisintortornunc");
+
+                setTimeout(function () {
+                    game.destroy();
+                    cb();
+                }, 60000);
+            }
+        }, true);
+    }, 120000);
 
     it("can wrap text correctly in a multiline text field", (cb) => {
         var game = new Phaser.Game({
