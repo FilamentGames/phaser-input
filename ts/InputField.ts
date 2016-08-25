@@ -50,8 +50,6 @@ module Fabrique {
 
         private windowScale: number = 1;
 
-        private savedScrollPos:Phaser.Point;
-
         public get value():string {
             return this.domElement.value;
         }
@@ -252,8 +250,6 @@ module Fabrique {
          *
          */
         public startFocus(e: Phaser.Pointer) {
-            this.savedScrollPos = new Phaser.Point(this.domElement.scrollLeft, this.domElement.scrollTop);
-
             if (this.game.device.desktop) {
                 //Timeout is a chrome hack
                 setTimeout(() => {
@@ -273,10 +269,6 @@ module Fabrique {
 
             this.domElement.addEventListeners(this.inputListener.bind(this), this.keyDownListener.bind(this), this.keyUpListener.bind(this));
             this.domElement.focus();
-
-            //Force the scroll position back to where it was (Chrome workaround)
-            this.domElement.scrollLeft = this.savedScrollPos.x;
-            this.domElement.scrollTop = this.savedScrollPos.y;
 
             //Make sure we have the correct scroll information
             this.updateFromDomElement();
@@ -308,27 +300,6 @@ module Fabrique {
             this.text.setText(this.value);
         }
 
-
-        /**
-         * Scroll the text box
-         */
-        private updateScrollFromElement() {
-            switch (this.inputOptions.align) {
-                case 'left':
-                    this.text.x = this.inputOptions.padding - this.domElement.scrollLeft;
-                    this.text.y = -this.domElement.scrollTop;
-                    break;
-                case 'center':
-                    this.text.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.domElement.scrollLeft;
-                    this.text.y = -this.domElement.scrollTop;
-                    break;
-                case 'right':
-                    this.text.x = this.inputOptions.padding + this.inputOptions.width - this.domElement.scrollLeft;
-                    this.text.y = -this.domElement.scrollTop;
-                    break;
-            }
-        }
-
         /**
          * Updates the position of the caret in the phaser input field
          */
@@ -337,13 +308,13 @@ module Fabrique {
 
             switch (this.inputOptions.align) {
                 case 'left':
-                    this.cursor.x = this.inputOptions.padding + caretPosition.x - this.domElement.scrollLeft;
+                    this.cursor.x = this.inputOptions.padding + caretPosition.x;
                     break;
                 case 'center':
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2  - this.text.width / 2  + caretPosition.x - this.domElement.scrollLeft;
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2  - this.text.width / 2  + caretPosition.x;
                     break;
                 case 'right':
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width - this.domElement.scrollLeft;
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
                     break;
             }
 
@@ -356,6 +327,8 @@ module Fabrique {
          * @returns {number}
          */
         private getCaretPosition():any {
+            //TODO: Get column and line information and apply scroll
+
             var caretPosition: any = this.domElement.caretPosition;
             if (-1 === caretPosition) {
                 caretPosition = this.value.length;
@@ -400,7 +373,6 @@ module Fabrique {
 
         private updateFromDomElement() {
             this.updateTextFromElement();
-            this.updateScrollFromElement();
             this.updateCursorFromElement();
         }
 

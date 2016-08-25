@@ -96,10 +96,11 @@ describe("InputField", () => {
                 var input = game.add.inputField(50, 50, {
                     width: 250,
                     placeHolder: "Enter text here",
+                    align: "center",
                     height: 22
                 });
 
-                input.value = "LoremipsumdolorsitametconsecteturadipiscingelitEtiamsedduiutsapienpharetrascelerisqueMaurisintortornunc";
+                input.value = "Loremipsumc";
 
                 setTimeout(function () {
                     game.destroy();
@@ -198,8 +199,8 @@ describe("InputField", () => {
                 setTimeout(function () {
                     game.destroy();
                     cb();
-                }, 5000);
+                }, 60000);
             }
         }, true);
-    }, 10000);
+    }, 120000);
 });

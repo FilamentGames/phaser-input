@@ -146,30 +146,6 @@ module Fabrique {
             return this.element.selectionStart;
         }
 
-        public get scrollLeft() {
-            if (this.game.device.ie && this.element instanceof HTMLInputElement) {
-                var range = this.element.createTextRange();
-                var inputStyle = window.getComputedStyle(this.element, undefined);
-                var paddingLeft = parseFloat(inputStyle.paddingLeft);
-                var rangeRect = range.getBoundingClientRect();
-                return this.element.getBoundingClientRect().left + this.element.clientLeft + paddingLeft - rangeRect.left;
-            } else {
-                return this.element.scrollLeft;
-            }
-        }
-
-        public set scrollLeft(val:number) {
-            this.element.scrollLeft = val;
-        }
-
-        public get scrollTop() {
-            return this.element.scrollTop;
-        }
-
-        public set scrollTop(val:number) {
-            this.element.scrollTop = val;
-        }
-
         public get caretPosition():number {
             if (this.type === InputType.number) {
                 return -1;
