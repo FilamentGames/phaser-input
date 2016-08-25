@@ -1,6 +1,6 @@
 module Fabrique {
     import Text = Phaser.Text;
-    export interface InputOptions extends Phaser.PhaserTextStyle {
+    export interface InputOptions {
         x?: number;
         y?: number;
         placeHolder?: string;
@@ -16,11 +16,16 @@ module Fabrique {
         type?: InputType;
         min?: string;
         max?: string;
-        align?: string;
-        wordWrap?: boolean;
         selectionColor?: string;
         zoom?: boolean;
         focusOutOnEnter?: boolean;
+        font?: string;
+        fontWeight?: string | number;
+        backgroundColor?: string;
+        fill?: any;
+        align?: string;
+        wordWrap?: boolean;
+        wordWrapWidth?: number;
     }
 
     export class InputField extends Phaser.Sprite {
