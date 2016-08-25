@@ -37,9 +37,10 @@
     "karma-safari-launcher": "1.0.0",
     "karma-sourcemap-loader": "0.3.7",
     "karma-typescript": "1.0.10",
+    "karma-typescript-preprocessor": "0.2.1",
     "phaser": "2.6.1",
     "phaser-nineslice": "^1.0.0",
-    "retyped-jasmine-tsd-ambient": "^2.2.0-0",
+    "retyped-jasmine-tsd-ambient": "2.2.0-0",
     "typescript": "1.8.x"
   },
   "engines": {
