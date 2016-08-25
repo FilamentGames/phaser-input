@@ -420,12 +420,15 @@ module Fabrique {
 
                 switch (this.inputOptions.align) {
                     case 'left':
-                        this.selection.x = this.inputOptions.padding;
+                        this.selection.x = this.inputOptions.padding - this.scrollPos.x;
                         break;
                     case 'center':
-                        this.selection.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2;
+                        this.selection.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 - this.scrollPos.x;
                         break;
                 }
+
+                this.selection.y = -this.scrollPos.y;
+
             } else {
                 this.selection.clear();
             }
