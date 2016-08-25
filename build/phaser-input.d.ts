@@ -1,4 +1,4 @@
-/// <reference path="../ts/phaser-input-shim.d.ts" />
+/// <reference path="../typings/phaser-input-shim.d.ts" />
 declare module Fabrique {
     enum InputType {
         text = 0,
@@ -31,7 +31,7 @@ declare module Fabrique {
     }
 }
 declare module Fabrique {
-    interface InputOptions extends Phaser.PhaserTextStyle {
+    interface InputOptions {
         x?: number;
         y?: number;
         placeHolder?: string;
@@ -47,11 +47,15 @@ declare module Fabrique {
         type?: InputType;
         min?: string;
         max?: string;
-        align?: string;
-        wordWrap?: boolean;
         selectionColor?: string;
         zoom?: boolean;
         focusOutOnEnter?: boolean;
+        font?: string;
+        fontWeight?: string | number;
+        backgroundColor?: string;
+        fill?: any;
+        align?: string;
+        wordWrap?: boolean;
     }
     class InputField extends Phaser.Sprite {
         focusOutOnEnter: boolean;

@@ -18,7 +18,7 @@ var Fabrique;
     var InputElement = (function () {
         function InputElement(game, id, type, value, multiline) {
             var _this = this;
-            if (type === void 0) { type = InputType.text; }
+            if (type === void 0) { type = Fabrique.InputType.text; }
             if (value === void 0) { value = ''; }
             if (multiline === void 0) { multiline = false; }
             this.focusIn = new Phaser.Signal();
@@ -28,10 +28,10 @@ var Fabrique;
             this.game = game;
             if (multiline) {
                 this.element = document.createElement('textarea');
-                this.element.type = InputType[type];
             }
             else {
                 this.element = document.createElement('input');
+                this.element.type = InputType[type];
             }
             this.element.id = id;
             this.element.style.position = 'absolute';
@@ -698,7 +698,7 @@ var Fabrique;
     })(Phaser.Graphics);
     Fabrique.TextMask = TextMask;
 })(Fabrique || (Fabrique = {}));
-///<reference path="./phaser-input-shim.d.ts"/>
+///<reference path="../typings/phaser-input-shim.d.ts"/>
 var Fabrique;
 (function (Fabrique) {
     var Plugins;
