@@ -49,6 +49,8 @@ module Fabrique {
 
         private selection: SelectionHighlight;
 
+        private lines:string[];
+
         private windowScale: number = 1;
 
         private scrollPos:Phaser.Point = new Phaser.Point();
@@ -95,8 +97,6 @@ module Fabrique {
             this.domElement = new Fabrique.InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(),
                 "", this.inputOptions);
 
-            this.selection = new Fabrique.SelectionHighlight(this.game, this.inputOptions);
-            this.addChild(this.selection);
 
             if (inputOptions.placeHolder && inputOptions.placeHolder.length > 0) {
                 this.placeHolder = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding,
@@ -139,6 +139,9 @@ module Fabrique {
             });
 
             this.offscreenText.useAdvancedWrap = true;
+
+            this.selection = new Fabrique.SelectionHighlight(this.game, this.inputOptions, this.offscreenText, this.cursor);
+            this.addChild(this.selection);
 
             this.updateTextPos();
 
@@ -287,6 +290,7 @@ module Fabrique {
             }
 
             this.text.setText(this.value);
+            this.lines = this.offscreenText.precalculateWordWrap(this.value);
         }
 
         /**
@@ -319,7 +323,7 @@ module Fabrique {
 
             if (this.inputOptions.wordWrap) {
                 //Measure the number of lines down
-                var lines = this.text.precalculateWordWrap(this.value);
+                var lines = this.lines;
                 var index = 0;
 
                 for (var i = 0; i < lines.length; i++) {
@@ -349,6 +353,7 @@ module Fabrique {
         private updateFromDomElement() {
             this.updateTextFromElement();
             this.updateCursorFromElement();
+            this.updateSelection();
         }
 
         private getCursorIndex(globalPoint:PIXI.Point):number {
@@ -398,6 +403,8 @@ module Fabrique {
 
         /**
          * This checks if a select has been made, and if so highlight it with blue
+         * TODO: Handle multiline selection
+         * TODO: Handle mouse selection
          */
         private updateSelection(): void {
             if (this.domElement.hasSelection) {
@@ -408,12 +415,8 @@ module Fabrique {
                         text += '*';
                     }
                 }
-                text = text.substring(this.domElement.caretStart, this.domElement.caretEnd);
-                this.offscreenText.setText(text);
 
-                //TODO: Handle multiline selection
-                //TODO: Handle keyboard selection
-                this.selection.updateSelection(this.offscreenText.getBounds());
+                this.selection.updateSelection(this.domElement.caretStart, this.domElement.caretEnd, this.lines);
 
                 switch (this.inputOptions.align) {
                     case 'left':
