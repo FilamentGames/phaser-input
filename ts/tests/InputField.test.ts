@@ -24,6 +24,64 @@ describe("InputField", () => {
         }, true);
     }, 10000);
 
+    it("can display a number field", (cb) => {
+        var game = new Phaser.Game({
+            width: "100%",
+            height: "100%"
+        });
+        (<any>window).game = game;
+        game.state.add("test", {
+            init: function () {
+                game.plugins.add(Fabrique.Plugins.InputField);
+            },
+            create: function () {
+                var input = game.add.inputField(50, 50, {
+                    width: 250,
+                    height: 22,
+                    type: Fabrique.InputType.number,
+                    min: 0,
+                    max: 100
+                });
+
+                input.setText("50");
+
+                setTimeout(function () {
+                    game.destroy();
+                    cb();
+                }, 5000);
+            }
+        }, true);
+    }, 10000);
+
+    it("can display a password field", (cb) => {
+        var game = new Phaser.Game({
+            width: "100%",
+            height: "100%"
+        });
+        (<any>window).game = game;
+        game.state.add("test", {
+            init: function () {
+                game.plugins.add(Fabrique.Plugins.InputField);
+            },
+            create: function () {
+                var input = game.add.inputField(50, 50, {
+                    width: 250,
+                    height: 22,
+                    type: Fabrique.InputType.password,
+                    min: 0,
+                    max: 100
+                });
+
+                input.setText("password");
+
+                setTimeout(function () {
+                    game.destroy();
+                    cb();
+                }, 5000);
+            }
+        }, true);
+    }, 10000);
+
     it("can display a multiline input field with a placeholder", (cb) => {
         var game = new Phaser.Game({
             width: "100%",
@@ -50,7 +108,7 @@ describe("InputField", () => {
         }, true);
     }, 10000);
 
-    fit("can wrap text correctly in a multiline text field", (cb) => {
+    it("can wrap text correctly in a multiline text field", (cb) => {
         var game = new Phaser.Game({
             width: "100%",
             height: "100%"
