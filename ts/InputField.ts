@@ -397,10 +397,7 @@ module Fabrique {
                 localPoint.x += this.text.width / 2;
             }
 
-
-            var index = this.getCursorIndex(localPoint);
-
-            this.domElement.caretPosition = index;
+            this.domElement.caretPosition = this.getCursorIndex(localPoint);
         }
 
         private updateFromDomElement() {
