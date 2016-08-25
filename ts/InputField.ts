@@ -105,6 +105,7 @@ module Fabrique {
                     wordWrapWidth: inputOptions.width
                 });
                 this.placeHolder.mask = this.textMask;
+                this.placeHolder.useAdvancedWrap = true;
                 this.addChild(this.placeHolder);
             }
 
@@ -124,6 +125,7 @@ module Fabrique {
                 wordWrapWidth: inputOptions.width
             });
             this.text.mask = this.textMask;
+            this.text.useAdvancedWrap = true;
             this.addChild(this.text);
 
             this.offscreenText = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, '', <Phaser.PhaserTextStyle>{
@@ -132,6 +134,8 @@ module Fabrique {
                 fill: inputOptions.fill,
                 wordWrapWidth: inputOptions.width
             });
+
+            this.offscreenText.useAdvancedWrap = true;
 
             var caretPosition = this.getCaretPosition();
 
