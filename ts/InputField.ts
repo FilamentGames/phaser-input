@@ -53,6 +53,8 @@ module Fabrique {
 
         private scrollPos:Phaser.Point = new Phaser.Point();
 
+        private cursorPos:Phaser.Point = new Phaser.Point();
+
         public get value():string {
             return this.domElement.value;
         }
@@ -291,22 +293,9 @@ module Fabrique {
          * Updates the position of the caret in the phaser input field
          */
         private updateCursorFromElement() {
-            var caretPosition = this.getCaretPosition();
-
-            switch (this.inputOptions.align) {
-                case 'left':
-                    this.cursor.x = this.inputOptions.padding + caretPosition.x;
-                    break;
-                case 'center':
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2  - this.text.width / 2  + caretPosition.x;
-                    break;
-                case 'right':
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
-                    break;
-            }
-
-            this.cursor.y = caretPosition.y;
-            this.scrollTo(caretPosition);
+            this.cursorPos = this.getCaretPosition();
+            this.scrollTo(this.cursorPos);
+            this.updateCursorPos();
         }
 
         /**
@@ -503,10 +492,20 @@ module Fabrique {
         }
 
         private scrollTo(cursorPos:Phaser.Point) {
-            this.scrollPos.x = cursorPos.x >  this.inputOptions.width ? cursorPos.x - this.inputOptions.width : 0;
-            this.scrollPos.y = cursorPos.y > this.inputOptions.height ? cursorPos.y - this.inputOptions.height : 0;
+            if (cursorPos.x < this.scrollPos.x) {
+                this.scrollPos.x += cursorPos.x - this.scrollPos.x;
+            } else if (cursorPos.x > this.scrollPos.x + this.inputOptions.width) {
+                this.scrollPos.x += cursorPos.x - this.scrollPos.x - this.inputOptions.width;
+            }
+
+            if (cursorPos.y < this.scrollPos.y) {
+                this.scrollPos.y += cursorPos.y - this.scrollPos.y;
+            } else if (cursorPos.y > this.scrollPos.y + this.inputOptions.height - this.cursor.height) {
+                this.scrollPos.y += cursorPos.y + this.cursor.height - this.scrollPos.y - this.inputOptions.height;
+            }
 
             this.updateTextPos();
+            this.updateCursorPos();
         }
 
         private updateTextPos() {
@@ -526,6 +525,22 @@ module Fabrique {
             }
 
             this.text.y = -this.scrollPos.y;
+        }
+
+        private updateCursorPos() {
+            switch (this.inputOptions.align) {
+                case 'left':
+                    this.cursor.x = this.inputOptions.padding + this.cursorPos.x - this.scrollPos.x;
+                    break;
+                case 'center':
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2  - this.text.width / 2  + this.cursorPos.x - this.scrollPos.x;
+                    break;
+                case 'right':
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width - this.scrollPos.x;
+                    break;
+            }
+
+            this.cursor.y = this.cursorPos.y - this.scrollPos.y;
         }
     }
 }
