@@ -28,7 +28,6 @@ module Fabrique {
     }
 
     export class InputField extends Phaser.Sprite {
-        public focusOutOnEnter: boolean = true;
 
         private placeHolder:Phaser.Text = null;
 
@@ -70,8 +69,10 @@ module Fabrique {
             this.inputOptions.fillAlpha = (inputOptions.fillAlpha === undefined) ? 1 : inputOptions.fillAlpha;
             this.inputOptions.selectionColor = inputOptions.selectionColor || 'rgba(179, 212, 253, 0.8)';
             this.inputOptions.zoom = (!game.device.desktop) ? inputOptions.zoom || false : false;
-
-            this.focusOutOnEnter = this.inputOptions.focusOutOnEnter;
+            this.inputOptions.font = inputOptions.font || '14px Arial';
+            this.inputOptions.fontWeight = inputOptions.fontWeight || 'normal';
+            this.inputOptions.fill = inputOptions.fill || '#000000';
+            this.inputOptions.placeHolderColor = inputOptions.placeHolderColor || '#bfbebd';
 
             //create the input box
             this.box = new Fabrique.InputBox(this.game, inputOptions);
@@ -83,8 +84,8 @@ module Fabrique {
 
             //Create the hidden dom elements
             this.domElement = new Fabrique.InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(),
-                this.inputOptions.type, this.value, this.inputOptions.wordWrap);
-            this.domElement.setMax(this.inputOptions.max, this.inputOptions.min);
+                this.value, this.inputOptions);
+
 
             this.selection = new Fabrique.SelectionHighlight(this.game, this.inputOptions);
             this.addChild(this.selection);
@@ -92,9 +93,9 @@ module Fabrique {
             if (inputOptions.placeHolder && inputOptions.placeHolder.length > 0) {
                 this.placeHolder = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding,
                     inputOptions.placeHolder, <Phaser.PhaserTextStyle>{
-                    font: inputOptions.font || '14px Arial',
-                    fontWeight: inputOptions.fontWeight || 'normal',
-                    fill: inputOptions.placeHolderColor || '#bfbebd',
+                    font: inputOptions.font,
+                    fontWeight: inputOptions.fontWeight,
+                    fill: inputOptions.placeHolderColor,
                     wordWrap: inputOptions.wordWrap,
                     wordWrapWidth: inputOptions.width
                 });
@@ -103,17 +104,17 @@ module Fabrique {
             }
 
             this.cursor = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding - 2, '|', <Phaser.PhaserTextStyle>{
-                font: inputOptions.font || '14px Arial',
-                fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.cursorColor || '#000000'
+                font: inputOptions.font,
+                fontWeight: inputOptions.fontWeight,
+                fill: inputOptions.cursorColor
             });
             this.cursor.visible = false;
             this.addChild(this.cursor);
 
             this.text = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, '', <Phaser.PhaserTextStyle>{
-                font: inputOptions.font || '14px Arial',
-                fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.fill || '#000000',
+                font: inputOptions.font,
+                fontWeight: inputOptions.fontWeight,
+                fill: inputOptions.fill,
                 wordWrap: inputOptions.wordWrap,
                 wordWrapWidth: inputOptions.width
             });
@@ -121,9 +122,9 @@ module Fabrique {
             this.addChild(this.text);
 
             this.offscreenText = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, '', <Phaser.PhaserTextStyle>{
-                font: inputOptions.font || '14px Arial',
-                fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.fill || '#000000',
+                font: inputOptions.font,
+                fontWeight: inputOptions.fontWeight,
+                fill: inputOptions.fill,
                 wordWrapWidth: inputOptions.width
             });
 
@@ -302,25 +303,21 @@ module Fabrique {
 
             this.text.setText(text);
 
-            if (this.text.width > this.inputOptions.width) {
-                this.text.anchor.x = 1;
-                this.text.x = this.inputOptions.padding + this.inputOptions.width;
-            } else {
-                switch (this.inputOptions.align) {
-                    case 'left':
-                        this.text.anchor.set(0, 0);
-                        this.text.x = this.inputOptions.padding;
-                        break;
-                    case 'center':
-                        this.text.anchor.set(0.5, 0);
-                        this.text.x = this.inputOptions.padding + this.inputOptions.width / 2;
-                        break;
-                    case 'right':
-                        this.text.anchor.set(1, 0);
-                        this.text.x = this.inputOptions.padding + this.inputOptions.width;
-                        break;
-                }
+            switch (this.inputOptions.align) {
+                case 'left':
+                    this.text.anchor.set(0, 0);
+                    this.text.x = this.inputOptions.padding;
+                    break;
+                case 'center':
+                    this.text.anchor.set(0.5, 0);
+                    this.text.x = this.inputOptions.padding + this.inputOptions.width / 2;
+                    break;
+                case 'right':
+                    this.text.anchor.set(1, 0);
+                    this.text.x = this.inputOptions.padding + this.inputOptions.width;
+                    break;
             }
+
         }
 
         /**
@@ -376,7 +373,6 @@ module Fabrique {
 
                     if (index + line.length >= caretPosition) {
                         var lineOffset = caretPosition - index;
-                        console.log(caretPosition, i, index, lineOffset);
                         line = line.slice(0, lineOffset);
                         this.text.context.font = this.text.cssFont;
                         let width = this.text.context.measureText(line).width;
@@ -526,7 +522,7 @@ module Fabrique {
 
         private keyDownListener(evt: KeyboardEvent) {
             if (evt.keyCode === 13) {
-                if(this.focusOutOnEnter) {
+                if(this.inputOptions.focusOutOnEnter) {
                     this.endFocus();
                     return;
                 }

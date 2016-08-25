@@ -25,22 +25,28 @@ module Fabrique {
 
         public focusOut: Phaser.Signal = new Phaser.Signal();
 
-        constructor(game: Phaser.Game, id: string, type: InputType = Fabrique.InputType.text, value: string = '', multiline:boolean = false) {
+        constructor(game: Phaser.Game, id: string, value: string = '', options: Fabrique.InputOptions) {
             this.id = id;
-            this.type = type;
+            this.type = options.type;
             this.game = game;
 
-            if (multiline) {
+            if (options.wordWrap) {
                 this.element = document.createElement('textarea');
             } else {
                 this.element = document.createElement('input');
-                this.element.type = InputType[type];
+                this.element.type = Fabrique.InputType[this.type];
             }
+
+            this.setMax(options.max, options.min);
 
             this.element.id = id;
             this.element.style.position = 'absolute';
             this.element.style.top = (-100).toString() + 'px';
             this.element.style.left = (-100).toString() + 'px';
+            this.element.style.width = options.width + 'px';
+            this.element.style.height = options.height + 'px';
+            this.element.style.font = options.font;
+            this.element.style.fontWeight = options.fontWeight.toString();
             this.element.value = this.value;
 
 
@@ -73,14 +79,14 @@ module Fabrique {
             document.body.removeChild(this.element);
         }
 
-        public setMax(max: string, min?: string) {
+        private setMax(max: string, min?: string) {
             if (max === undefined) {
                 return;
             }
 
             if (this.type === InputType.text || this.type === InputType.password) {
                 this.element.maxLength = parseInt(max, 10);
-            } else if (this.type === InputType.number && this.element instanceof HTMLInputElement) {
+            } else if (this.type === InputType.number) {
                 (<HTMLInputElement>this.element).max = max;
                 if (min === undefined) {
                     return;
