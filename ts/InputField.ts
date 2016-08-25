@@ -42,6 +42,7 @@ module Fabrique {
         private text:Phaser.Text;
 
         private offscreenText: Phaser.Text;
+
         private inputOptions: InputOptions;
 
         private domElement: InputElement;
@@ -49,6 +50,8 @@ module Fabrique {
         private selection: SelectionHighlight;
 
         private windowScale: number = 1;
+
+        private scrollPos:Phaser.Point = new Phaser.Point();
 
         public get value():string {
             return this.domElement.value;
@@ -135,23 +138,7 @@ module Fabrique {
 
             this.offscreenText.useAdvancedWrap = true;
 
-            var caretPosition = this.getCaretPosition();
-
-            switch (this.inputOptions.align) {
-                case 'left':
-                    this.text.anchor.set(0, 0);
-                    break;
-                case 'center':
-                    this.text.anchor.set(0.5, 0);
-                    this.text.x += this.inputOptions.width / 2;
-                    break;
-                case 'right':
-                    this.text.anchor.set(1, 0);
-                    this.text.x += this.inputOptions.width;
-                    break;
-            }
-
-            this.cursor.y = caretPosition.y;
+            this.updateTextPos();
 
             this.inputEnabled = true;
             this.input.useHandCursor = true;
@@ -319,6 +306,7 @@ module Fabrique {
             }
 
             this.cursor.y = caretPosition.y;
+            this.scrollTo(caretPosition);
         }
 
         /**
@@ -326,9 +314,7 @@ module Fabrique {
          *
          * @returns {number}
          */
-        private getCaretPosition():any {
-            //TODO: Get column and line information and apply scroll
-
+        private getCaretPosition():Phaser.Point {
             var caretPosition: any = this.domElement.caretPosition;
             if (-1 === caretPosition) {
                 caretPosition = this.value.length;
@@ -355,11 +341,11 @@ module Fabrique {
                         line = line.slice(0, lineOffset);
                         this.text.context.font = this.text.cssFont;
                         let width = this.text.context.measureText(line).width;
-                        return {x: width, y: this.cursor.height * i};
+                        return new Phaser.Point(width, this.cursor.height * i);
                     } else if (i == lines.length - 1) { //This is the last line
                         this.text.context.font = this.text.cssFont;
                         let width = this.text.context.measureText(line).width;
-                        return {x: width, y: this.cursor.height * i};
+                        return new Phaser.Point(width, this.cursor.height * i);
                     }
 
                     index += line.length + 1;
@@ -367,7 +353,7 @@ module Fabrique {
             } else {
                 this.text.context.font = this.text.cssFont;
                 let width = this.text.context.measureText(text.slice(0, caretPosition)).width;
-                return {x: width, y: 0};
+                return new Phaser.Point(width, 0);
             }
         }
 
@@ -388,6 +374,7 @@ module Fabrique {
             if (this.inputOptions.wordWrap) {
                 var lines = this.text.precalculateWordWrap(this.value);
 
+                //TODO: Try binary search to speed this up
                 for (let i:number = 0, lineY:number = this.cursor.height; i < lines.length; i++, lineY += this.cursor.height) {
                     var line = lines[i];
 
@@ -410,7 +397,7 @@ module Fabrique {
                 for (let j:number = 0; j < this.value.length; j++, index++) {
                     this.text.context.font = this.text.cssFont;
                     let width = this.text.context.measureText(this.value.slice(0, j)).width;
-
+                    //TODO: Try binary search to speed this up
                     if (width >= localPoint.x) {
                         return (index > 0 ? index - 1 : index);
                     }
@@ -513,6 +500,32 @@ module Fabrique {
          */
         public resetText() {
             this.value = "";
+        }
+
+        private scrollTo(cursorPos:Phaser.Point) {
+            this.scrollPos.x = cursorPos.x >  this.inputOptions.width ? cursorPos.x - this.inputOptions.width : 0;
+            this.scrollPos.y = cursorPos.y > this.inputOptions.height ? cursorPos.y - this.inputOptions.height : 0;
+
+            this.updateTextPos();
+        }
+
+        private updateTextPos() {
+            switch (this.inputOptions.align) {
+                case 'left':
+                    this.text.anchor.set(0, 0);
+                    this.text.x = -this.scrollPos.x;
+                    break;
+                case 'center':
+                    this.text.anchor.set(0.5, 0);
+                    this.text.x = this.inputOptions.width / 2 - this.scrollPos.x;
+                    break;
+                case 'right':
+                    this.text.anchor.set(1, 0);
+                    this.text.x = this.inputOptions.width - this.scrollPos.x;
+                    break;
+            }
+
+            this.text.y = -this.scrollPos.y;
         }
     }
 }
