@@ -42,9 +42,6 @@ module Fabrique {
         private text:Phaser.Text;
 
         private offscreenText: Phaser.Text;
-
-        public value:string = '';
-
         private inputOptions: InputOptions;
 
         private domElement: InputElement;
@@ -53,7 +50,14 @@ module Fabrique {
 
         private windowScale: number = 1;
 
-        //public blockInput: boolean = true;
+        public get value():string {
+            return this.domElement.value;
+        }
+
+        public set value(val:string) {
+            this.domElement.value = val;
+            this.updateFromDomElement();
+        }
 
         constructor(game:Phaser.Game, x:number, y:number, inputOptions:InputOptions = {}) {
             super(game, x, y);
@@ -84,8 +88,7 @@ module Fabrique {
 
             //Create the hidden dom elements
             this.domElement = new Fabrique.InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(),
-                this.value, this.inputOptions);
-
+                "", this.inputOptions);
 
             this.selection = new Fabrique.SelectionHighlight(this.game, this.inputOptions);
             this.addChild(this.selection);
@@ -287,7 +290,15 @@ module Fabrique {
          * Update the text value in the box
          */
         private updateTextFromElement() {
-            this.setText(this.domElement.value);
+            if (null !== this.placeHolder) {
+                if (this.value.length > 0) {
+                    this.placeHolder.visible = false;
+                } else {
+                    this.placeHolder.visible = true;
+                }
+            }
+
+            this.text.setText(this.value);
         }
 
 
@@ -529,34 +540,7 @@ module Fabrique {
          * Resets the text to an empty value
          */
         public resetText() {
-            this.setText();
-        }
-
-        public setText(text: string = ''): void {
-            if (this.inputOptions.type === Fabrique.InputType.password) {
-                for (let i = 0; i < text.length; i++) {
-                    text += '*';
-                }
-            } else if (this.inputOptions.type === Fabrique.InputType.number) {
-                var val = parseInt(text);
-                if (val < parseInt(this.inputOptions.min)) {
-                    text = this.inputOptions.min;
-                } else if (val > parseInt(this.inputOptions.max)) {
-                    text = this.inputOptions.max;
-                }
-            }
-
-            if (null !== this.placeHolder) {
-                if (text.length > 0) {
-                    this.placeHolder.visible = false;
-                } else {
-                    this.placeHolder.visible = true;
-                }
-            }
-
-            this.value = text;
-            this.domElement.value = text;
-            this.text.setText(text);
+            this.value = "";
         }
     }
 }

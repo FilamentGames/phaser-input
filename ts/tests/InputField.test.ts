@@ -43,7 +43,7 @@ describe("InputField", () => {
                     max: 100
                 });
 
-                input.setText("50");
+                input.value = "50";
 
                 setTimeout(function () {
                     game.destroy();
@@ -72,7 +72,7 @@ describe("InputField", () => {
                     max: 100
                 });
 
-                input.setText("password");
+                input.value = "password";
 
                 setTimeout(function () {
                     game.destroy();
@@ -99,7 +99,7 @@ describe("InputField", () => {
                     height: 22
                 });
 
-                input.setText("LoremipsumdolorsitametconsecteturadipiscingelitEtiamsedduiutsapienpharetrascelerisqueMaurisintortornunc");
+                input.value = "LoremipsumdolorsitametconsecteturadipiscingelitEtiamsedduiutsapienpharetrascelerisqueMaurisintortornunc";
 
                 setTimeout(function () {
                     game.destroy();
@@ -153,7 +153,7 @@ describe("InputField", () => {
                     wordWrap: true
                 });
 
-                input.setText("LoremipsumdolorsitametconsecteturadipiscingelitEtiamsedduiutsapienpharetrascelerisqueMaurisintortornunc");
+                input.value = "LoremipsumdolorsitametconsecteturadipiscingelitEtiamsedduiutsapienpharetrascelerisqueMaurisintortornunc";
 
                 setTimeout(function () {
                     game.destroy();
@@ -181,7 +181,7 @@ describe("InputField", () => {
                     zoom: false
                 });
 
-                input.setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed dui ut sapien pharetra" +
+                input.value = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed dui ut sapien pharetra" +
                     "scelerisque. Mauris in tortor nunc. Vestibulum sodales, mi ac mattis dictum, leo sem fringilla felis," +
                     "in pharetra velit ante sit amet elit. Duis non tristique felis. Sed tincidunt ac ligula sit amet mattis." +
                     "Nunc dapibus orci nisl, id eleifend dolor porta quis. Integer porta vestibulum orci ut viverra. Nam ac erat" +
@@ -193,7 +193,7 @@ describe("InputField", () => {
                     "Vivamus ac tempus nibh. Sed vitae congue erat. Suspendisse lacinia dapibus felis, sed eleifend lectus " +
                     "posuere eu. Phasellus molestie euismod bibendum. Aliquam nunc neque, volutpat at feugiat et, placerat " +
                     "non sapien. Quisque varius fringilla nisl vitae auctor. Donec consectetur dui orci, non commodo nunc " +
-                    "dictum nec. Sed sagittis rhoncus vehicula. Nullam euismod ac purus a hendrerit. Mauris vitae orci diam.");
+                    "dictum nec. Sed sagittis rhoncus vehicula. Nullam euismod ac purus a hendrerit. Mauris vitae orci diam.";
 
                 setTimeout(function () {
                     game.destroy();

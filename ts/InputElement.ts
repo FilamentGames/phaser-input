@@ -170,7 +170,7 @@ module Fabrique {
 
         public set caretPosition(pos: number) {
             if (this.type === InputType.number) {
-                return ;
+                return;
             }
             this.element.setSelectionRange(pos, pos);
         }
