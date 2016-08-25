@@ -146,7 +146,15 @@ module Fabrique {
         }
 
         public get scrollLeft() {
-            return this.element.scrollLeft;
+            if (this.game.device.ie && this.element instanceof HTMLInputElement) {
+                var range = this.element.createTextRange();
+                var inputStyle = window.getComputedStyle(this.element, undefined);
+                var paddingLeft = parseFloat(inputStyle.paddingLeft);
+                var rangeRect = range.getBoundingClientRect();
+                return this.element.getBoundingClientRect().left + this.element.clientLeft + paddingLeft - rangeRect.left;
+            } else {
+                return this.element.scrollLeft;
+            }
         }
 
         public get scrollTop() {
