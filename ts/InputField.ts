@@ -50,6 +50,8 @@ module Fabrique {
 
         private windowScale: number = 1;
 
+        private savedScrollPos:Phaser.Point;
+
         public get value():string {
             return this.domElement.value;
         }
@@ -159,11 +161,7 @@ module Fabrique {
             this.domElement.focusOut.add((): void => {
 
                 if (Fabrique.Plugins.InputField.KeyboardOpen) {
-
                     this.endFocus();
-                    if (this.inputOptions.zoom) {
-                        this.zoomOut();
-                    }
                 }
             });
         }
@@ -183,21 +181,10 @@ module Fabrique {
                 this.resetText();
             }
             if (this.input.checkPointerOver(e)) {
-                if (this.focus) {
-                    this.setCaretOnclick(e);
-                    return;
-                }
-
-                if (this.inputOptions.zoom && !Fabrique.Plugins.InputField.Zoomed) {
-                    this.zoomIn();
-                }
-                this.startFocus();
+                this.startFocus(e);
             } else {
                 if (this.focus === true) {
                     this.endFocus();
-                    if (this.inputOptions.zoom) {
-                        this.zoomOut();
-                    }
                 }
             }
         }
@@ -254,36 +241,55 @@ module Fabrique {
                 Fabrique.Plugins.InputField.KeyboardOpen = false;
                 Fabrique.Plugins.InputField.onKeyboardClose.dispatch();
             }
+
+            if (this.inputOptions.zoom) {
+                this.zoomOut();
+            }
         }
 
         /**
          *
          */
-        public startFocus() {
+        public startFocus(e: Phaser.Pointer) {
+            this.savedScrollPos = new Phaser.Point(this.domElement.scrollLeft, this.domElement.scrollTop);
+
+            if (this.game.device.desktop) {
+                //Timeout is a chrome hack
+                setTimeout(() => {
+                    this.finishFocus(e);
+                }, 0);
+            } else {
+                this.finishFocus(e);
+            }
+        }
+
+        private finishFocus(e: Phaser.Pointer):void {
             this.focus = true;
 
             if (null !== this.placeHolder) {
                 this.placeHolder.visible = false;
             }
 
-            if (this.game.device.desktop) {
-                //Timeout is a chrome hack
-                setTimeout(() => {
-                    this.attachEvents();
-                }, 0);
-            } else {
-                this.attachEvents();
-            }
+            this.domElement.addEventListeners(this.inputListener.bind(this), this.keyDownListener.bind(this), this.keyUpListener.bind(this));
+            this.domElement.focus();
+
+            //Force the scroll position back to where it was (Chrome workaround)
+            this.domElement.scrollLeft = this.savedScrollPos.x;
+            this.domElement.scrollTop = this.savedScrollPos.y;
+
+            //Make sure we have the correct scroll information
+            this.updateFromDomElement();
+
+            this.domElement.caretPosition = this.getCursorIndex(new PIXI.Point(e.x, e.y));
 
             if (!this.game.device.desktop) {
                 Fabrique.Plugins.InputField.KeyboardOpen = true;
                 Fabrique.Plugins.InputField.onKeyboardOpen.dispatch();
             }
-        }
 
-        private attachEvents():void {
-            this.domElement.addEventListeners(this.inputListener.bind(this), this.keyDownListener.bind(this), this.keyUpListener.bind(this));
-            this.domElement.focus();
+            if (this.inputOptions.zoom && !Fabrique.Plugins.InputField.Zoomed) {
+                this.zoomIn();
+            }
         }
 
         /**
@@ -381,32 +387,19 @@ module Fabrique {
             }
         }
 
-        /**
-         * Set the caret when a click was made in the input field
-         *
-         * @param e
-         */
-        private setCaretOnclick(e: Phaser.Pointer) {
-            this.startFocus();
-
-            this.updateFromDomElement();
-
-            var localPoint: PIXI.Point = (this.text.toLocal(new PIXI.Point(e.x, e.y), this.game.world));
-
-            if (this.inputOptions.align && this.inputOptions.align === 'center') {
-                localPoint.x += this.text.width / 2;
-            }
-
-            this.domElement.caretPosition = this.getCursorIndex(localPoint);
-        }
-
         private updateFromDomElement() {
             this.updateTextFromElement();
             this.updateScrollFromElement();
             this.updateCursorFromElement();
         }
 
-        private getCursorIndex(localPoint:PIXI.Point):number {
+        private getCursorIndex(globalPoint:PIXI.Point):number {
+            var localPoint: PIXI.Point = (this.text.toLocal(new PIXI.Point(globalPoint.x, globalPoint.y), this.game.world));
+
+            if (this.inputOptions.align && this.inputOptions.align === 'center') {
+                localPoint.x += this.text.width / 2;
+            }
+
             var index:number = 0;
 
             if (this.inputOptions.wordWrap) {
