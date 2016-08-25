@@ -107,6 +107,7 @@ module Fabrique {
 
         public focus(): void {
             this.element.focus();
+
             if (!this.game.device.desktop && this.game.device.chrome) {
                 let originalWidth = window.innerWidth,
                     originalHeight = window.innerHeight;
@@ -157,8 +158,16 @@ module Fabrique {
             }
         }
 
+        public set scrollLeft(val:number) {
+            this.element.scrollLeft = val;
+        }
+
         public get scrollTop() {
             return this.element.scrollTop;
+        }
+
+        public set scrollTop(val:number) {
+            this.element.scrollTop = val;
         }
 
         public get caretPosition():number {
