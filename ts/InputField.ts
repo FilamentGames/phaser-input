@@ -163,8 +163,6 @@ module Fabrique {
                     }
                 }
             });
-
-            this.updateFromDomElement();
         }
 
         /**
@@ -289,27 +287,7 @@ module Fabrique {
          * Update the text value in the box
          */
         private updateTextFromElement() {
-            this.value = this.domElement.value;
-
-            var text: string = '';
-            if (this.inputOptions.type === Fabrique.InputType.password) {
-                for (let i = 0; i < this.value.length; i++) {
-                    text += '*';
-                }
-            }else if (this.inputOptions.type === Fabrique.InputType.number) {
-                var val = parseInt(this.value);
-                if (val < parseInt(this.inputOptions.min)) {
-                    text = this.inputOptions.min;
-                } else if (val > parseInt(this.inputOptions.max)) {
-                    text = this.inputOptions.max;
-                } else {
-                    text = this.value;
-                }
-            } else {
-                text = this.value;
-            }
-
-            this.text.setText(text);
+            this.setText(this.domElement.value);
         }
 
 
@@ -528,7 +506,6 @@ module Fabrique {
         }
 
         private keyDownListener(evt: KeyboardEvent) {
-            console.log("Key down");
 
             if (evt.keyCode === 13) {
                 if(this.inputOptions.focusOutOnEnter) {
@@ -539,7 +516,6 @@ module Fabrique {
         }
 
         private keyUpListener(evt: KeyboardEvent) {
-            console.log("Key up");
         }
 
         /**
@@ -559,6 +535,19 @@ module Fabrique {
         }
 
         public setText(text: string = ''): void {
+            if (this.inputOptions.type === Fabrique.InputType.password) {
+                for (let i = 0; i < text.length; i++) {
+                    text += '*';
+                }
+            } else if (this.inputOptions.type === Fabrique.InputType.number) {
+                var val = parseInt(text);
+                if (val < parseInt(this.inputOptions.min)) {
+                    text = this.inputOptions.min;
+                } else if (val > parseInt(this.inputOptions.max)) {
+                    text = this.inputOptions.max;
+                }
+            }
+
             if (null !== this.placeHolder) {
                 if (text.length > 0) {
                     this.placeHolder.visible = false;
@@ -568,7 +557,8 @@ module Fabrique {
             }
 
             this.value = text;
-            this.domElement.value = this.value;
+            this.domElement.value = text;
+            this.text.setText(text);
         }
     }
 }
