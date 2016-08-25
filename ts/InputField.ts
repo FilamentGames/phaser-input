@@ -290,7 +290,12 @@ module Fabrique {
             }
 
             this.text.setText(this.value);
-            this.lines = this.offscreenText.precalculateWordWrap(this.value);
+
+            if (this.inputOptions.wordWrap) {
+                this.lines = this.offscreenText.precalculateWordWrap(this.value);
+            } else {
+                this.lines = [this.value];
+            }
         }
 
         /**

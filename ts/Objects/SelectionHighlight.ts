@@ -43,7 +43,8 @@ module Fabrique {
                     var endPos = this.text.context.measureText(line.slice(0, endIdx));
 
                     this.beginFill(SelectionHighlight.rgb2hex(color), color.a);
-                    this.drawRect(0, i * this.cursor.height, endPos.width - startPos.width, this.cursor.height);
+                    console.log(startIdx, endIdx, startPos, endPos, i);
+                    this.drawRect(startPos.width, i * this.cursor.height, endPos.width - startPos.width, this.cursor.height);
                     this.endFill();
                 }
 
