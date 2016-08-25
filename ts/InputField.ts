@@ -163,6 +163,8 @@ module Fabrique {
                     }
                 }
             });
+
+            this.updateFromDomElement();
         }
 
         /**
@@ -199,19 +201,24 @@ module Fabrique {
             }
         }
 
+        public update() {
+            if (!this.focus) {
+                return;
+            }
+
+            this.updateFromDomElement();
+            this.updateCursorBlink();
+        }
+
+        private blink:boolean = true;
+        private cnt: number = 0;
+
         /**
          * Update function makes the cursor blink, it uses two private properties to make it toggle
          *
          * @returns {number}
          */
-        private blink:boolean = true;
-        private cnt: number = 0;
-        public update()
-        {
-            if (!this.focus) {
-                return;
-            }
-
+        private updateCursorBlink() {
             if (this.cnt !== 30) {
                 return this.cnt++;
             }
@@ -279,10 +286,11 @@ module Fabrique {
         }
 
         /**
-         * Update the text value in the box, and make sure the cursor is positioned correctly
+         * Update the text value in the box
          */
-        private updateText()
-        {
+        private updateTextFromElement() {
+            this.value = this.domElement.value;
+
             var text: string = '';
             if (this.inputOptions.type === Fabrique.InputType.password) {
                 for (let i = 0; i < this.value.length; i++) {
@@ -302,31 +310,33 @@ module Fabrique {
             }
 
             this.text.setText(text);
+        }
 
+
+        /**
+         * Scroll the text box
+         */
+        private updateScrollFromElement() {
             switch (this.inputOptions.align) {
                 case 'left':
-                    this.text.anchor.set(0, 0);
                     this.text.x = this.inputOptions.padding - this.domElement.scrollLeft;
                     this.text.y = -this.domElement.scrollTop;
                     break;
                 case 'center':
-                    this.text.anchor.set(0.5, 0);
                     this.text.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.domElement.scrollLeft;
                     this.text.y = -this.domElement.scrollTop;
                     break;
                 case 'right':
-                    this.text.anchor.set(1, 0);
                     this.text.x = this.inputOptions.padding + this.inputOptions.width - this.domElement.scrollLeft;
                     this.text.y = -this.domElement.scrollTop;
                     break;
             }
-
         }
 
         /**
          * Updates the position of the caret in the phaser input field
          */
-        private updateCursor() {
+        private updateCursorFromElement() {
             var caretPosition = this.getCaretPosition();
 
             this.cursor.x = this.inputOptions.padding + caretPosition.x - this.domElement.scrollLeft;
@@ -390,6 +400,10 @@ module Fabrique {
          * @param e
          */
         private setCaretOnclick(e: Phaser.Pointer) {
+            this.startFocus();
+
+            this.updateFromDomElement();
+
             var localPoint: PIXI.Point = (this.text.toLocal(new PIXI.Point(e.x, e.y), this.game.world));
 
             if (this.inputOptions.align && this.inputOptions.align === 'center') {
@@ -399,12 +413,13 @@ module Fabrique {
 
             var index = this.getCursorIndex(localPoint);
 
-
-            this.startFocus();
-
             this.domElement.caretPosition = index;
+        }
 
-            this.updateCursor();
+        private updateFromDomElement() {
+            this.updateTextFromElement();
+            this.updateScrollFromElement();
+            this.updateCursorFromElement();
         }
 
         private getCursorIndex(localPoint:PIXI.Point):number {
@@ -513,24 +528,18 @@ module Fabrique {
         }
 
         private keyDownListener(evt: KeyboardEvent) {
+            console.log("Key down");
+
             if (evt.keyCode === 13) {
                 if(this.inputOptions.focusOutOnEnter) {
                     this.endFocus();
                     return;
                 }
             }
-
-            this.value = this.domElement.value;
-            this.updateText();
-            this.updateCursor();
-            this.updateSelection();
         }
 
         private keyUpListener(evt: KeyboardEvent) {
-            this.value = this.domElement.value;
-            this.updateText();
-            this.updateCursor();
-            this.updateSelection();
+            console.log("Key up");
         }
 
         /**
@@ -560,9 +569,6 @@ module Fabrique {
 
             this.value = text;
             this.domElement.value = this.value;
-            this.updateText();
-            this.updateCursor();
-            this.endFocus();
         }
     }
 }
