@@ -19,8 +19,8 @@ describe("InputField", () => {
                 setTimeout(function () {
                     game.destroy();
                     cb();
-                }, 1000);
+                }, 5000);
             }
         }, true);
-    });
+    }, 10000);
 });
