@@ -36,14 +36,14 @@ module Fabrique {
 
                 if (index + line.length >= start && index <= end) {
                     var startIdx = start > index ? start - index : 0;
-                    var endIdx = index + line.length <= end ? line.length : line.length + (index - end);
+                    var endIdx = index + line.length <= end ? line.length : end - index;
                     this.text.context.font = this.text.cssFont;
 
                     var startPos = this.text.context.measureText(line.slice(0, startIdx));
                     var endPos = this.text.context.measureText(line.slice(0, endIdx));
 
                     this.beginFill(SelectionHighlight.rgb2hex(color), color.a);
-                    this.drawRect(startPos.width, i * this.cursor.height, endPos.width, (i + 1) * this.cursor.height);
+                    this.drawRect(0, i * this.cursor.height, endPos.width - startPos.width, this.cursor.height);
                     this.endFill();
                 }
 
