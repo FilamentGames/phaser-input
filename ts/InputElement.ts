@@ -128,7 +128,7 @@ module Fabrique {
             this.element.blur();
         }
 
-        get hasSelection () {
+        public get hasSelection () {
             if (this.type === InputType.number) {
                 return false;
             }
@@ -136,22 +136,30 @@ module Fabrique {
             return this.element.selectionStart !== this.element.selectionEnd;
         }
 
-        get caretStart() {
+        public get caretStart() {
             return this.element.selectionEnd;
         }
 
-        get caretEnd() {
+        public get caretEnd() {
             return this.element.selectionStart;
         }
 
-        public getCaretPosition() {
+        public get scrollLeft() {
+            return this.element.scrollLeft;
+        }
+
+        public get scrollTop() {
+            return this.element.scrollTop;
+        }
+
+        public get caretPosition():number {
             if (this.type === InputType.number) {
                 return -1;
             }
             return this.element.selectionStart;
         }
 
-        public setCaretPosition(pos: number) {
+        public set caretPosition(pos: number) {
             if (this.type === InputType.number) {
                 return ;
             }

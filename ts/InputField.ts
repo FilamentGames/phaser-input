@@ -349,7 +349,7 @@ module Fabrique {
         private getCaretPosition():any {
             //TODO: Position caret at the edge of the textfield if there is more text than can fit visually
 
-            var caretPosition: any = this.domElement.getCaretPosition();
+            var caretPosition: any = this.domElement.caretPosition;
             if (-1 === caretPosition) {
                 caretPosition = this.value.length;
             }
@@ -410,7 +410,7 @@ module Fabrique {
 
             this.startFocus();
 
-            this.domElement.setCaretPosition(index);
+            this.domElement.caretPosition = index;
 
             this.updateCursor();
         }
