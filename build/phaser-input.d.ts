@@ -15,19 +15,18 @@ declare module Fabrique {
         private game;
         focusIn: Phaser.Signal;
         focusOut: Phaser.Signal;
-        constructor(game: Phaser.Game, id: string, type?: InputType, value?: string, multiline?: boolean);
+        constructor(game: Phaser.Game, id: string, value: string, options: Fabrique.InputOptions);
         addEventListeners(inputCallback: () => void, keyDownCallback: () => void, keyUpCallback: () => void): void;
         removeEventListeners(): void;
         destroy(): void;
-        setMax(max: string, min?: string): void;
+        private setMax(max, min?);
         value: string;
         focus(): void;
         blur(): void;
         hasSelection: boolean;
         caretStart: number;
         caretEnd: number;
-        getCaretPosition(): number;
-        setCaretPosition(pos: number): void;
+        caretPosition: number;
     }
 }
 declare module Fabrique {
@@ -58,7 +57,6 @@ declare module Fabrique {
         wordWrap?: boolean;
     }
     class InputField extends Phaser.Sprite {
-        focusOutOnEnter: boolean;
         private placeHolder;
         private box;
         private textMask;
@@ -66,11 +64,14 @@ declare module Fabrique {
         private cursor;
         private text;
         private offscreenText;
-        value: string;
         private inputOptions;
         private domElement;
         private selection;
+        private lines;
         private windowScale;
+        private scrollPos;
+        private cursorPos;
+        value: string;
         constructor(game: Phaser.Game, x: number, y: number, inputOptions?: InputOptions);
         /**
          * This is a generic input down handler for the game.
@@ -82,14 +83,15 @@ declare module Fabrique {
          * @param e Phaser.Pointer
          */
         private checkDown(e);
+        update(): void;
+        private blink;
+        private cnt;
         /**
          * Update function makes the cursor blink, it uses two private properties to make it toggle
          *
          * @returns {number}
          */
-        private blink;
-        private cnt;
-        update(): number;
+        private updateCursorBlink();
         /**
          * Focus is lost on the input element, we disable the cursor and remove the hidden input element
          */
@@ -97,31 +99,28 @@ declare module Fabrique {
         /**
          *
          */
-        startFocus(): void;
-        private attachEvents();
+        startFocus(e: Phaser.Pointer): void;
+        private finishFocus(e);
         /**
-         * Update the text value in the box, and make sure the cursor is positioned correctly
+         * Update the text value in the box
          */
-        private updateText();
+        private updateTextFromElement();
         /**
          * Updates the position of the caret in the phaser input field
          */
-        private updateCursor();
+        private updateCursorFromElement();
         /**
          * Fetches the carrot position from the dom element. This one changes when you use the keyboard to navigate the element
          *
          * @returns {number}
          */
         private getCaretPosition();
-        /**
-         * Set the caret when a click was made in the input field
-         *
-         * @param e
-         */
-        private setCaretOnclick(e);
-        private getCursorIndex(localPoint);
+        private updateFromDomElement();
+        private getCursorIndex(globalPoint);
         /**
          * This checks if a select has been made, and if so highlight it with blue
+         * TODO: Handle multiline selection
+         * TODO: Handle mouse selection
          */
         private updateSelection();
         private zoomIn();
@@ -140,7 +139,9 @@ declare module Fabrique {
          * Resets the text to an empty value
          */
         resetText(): void;
-        setText(text?: string): void;
+        private scrollTo(cursorPos);
+        private updateTextPos();
+        private updateCursorPos();
     }
 }
 declare module Fabrique {
@@ -151,8 +152,10 @@ declare module Fabrique {
 declare module Fabrique {
     class SelectionHighlight extends Phaser.Graphics {
         private inputOptions;
-        constructor(game: Phaser.Game, inputOptions: InputOptions);
-        updateSelection(rect: PIXI.Rectangle): void;
+        private text;
+        private cursor;
+        constructor(game: Phaser.Game, inputOptions: InputOptions, text: Phaser.Text, cursor: Phaser.Text);
+        updateSelection(start: number, end: number, lines: string[]): void;
         static rgb2hex(color: {
             r: number;
             g: number;

@@ -1,5 +1,5 @@
 /*!
- * phaser-input - version 1.2.3-filament4 
+ * phaser-input - version 1.2.3-filament5 
  * Adds input boxes to Phaser like CanvasInput, but also works for WebGL and Mobile, made for Phaser only.
  *
  * OrangeGames
@@ -16,27 +16,31 @@ var Fabrique;
     })(Fabrique.InputType || (Fabrique.InputType = {}));
     var InputType = Fabrique.InputType;
     var InputElement = (function () {
-        function InputElement(game, id, type, value, multiline) {
+        function InputElement(game, id, value, options) {
             var _this = this;
-            if (type === void 0) { type = Fabrique.InputType.text; }
             if (value === void 0) { value = ''; }
-            if (multiline === void 0) { multiline = false; }
             this.focusIn = new Phaser.Signal();
             this.focusOut = new Phaser.Signal();
             this.id = id;
-            this.type = type;
+            this.type = options.type;
             this.game = game;
-            if (multiline) {
+            if (options.wordWrap) {
                 this.element = document.createElement('textarea');
             }
             else {
                 this.element = document.createElement('input');
-                this.element.type = InputType[type];
+                this.element.type = Fabrique.InputType[this.type];
             }
+            this.setMax(options.max, options.min);
             this.element.id = id;
             this.element.style.position = 'absolute';
-            this.element.style.top = (-100).toString() + 'px';
-            this.element.style.left = (-100).toString() + 'px';
+            this.element.style.top = (-1000).toString() + 'px';
+            this.element.style.left = (-1000).toString() + 'px';
+            this.element.style.width = options.width + 'px';
+            this.element.style.height = options.height + 'px';
+            this.element.style.font = options.font;
+            this.element.style.textAlign = options.align;
+            this.element.style.fontWeight = options.fontWeight.toString();
             this.element.value = this.value;
             this.element.addEventListener('focusin', function () {
                 _this.focusIn.dispatch();
@@ -69,7 +73,7 @@ var Fabrique;
             if (this.type === InputType.text || this.type === InputType.password) {
                 this.element.maxLength = parseInt(max, 10);
             }
-            else if (this.type === InputType.number && this.element instanceof HTMLInputElement) {
+            else if (this.type === InputType.number) {
                 this.element.max = max;
                 if (min === undefined) {
                     return;
@@ -131,18 +135,22 @@ var Fabrique;
             enumerable: true,
             configurable: true
         });
-        InputElement.prototype.getCaretPosition = function () {
-            if (this.type === InputType.number) {
-                return -1;
-            }
-            return this.element.selectionStart;
-        };
-        InputElement.prototype.setCaretPosition = function (pos) {
-            if (this.type === InputType.number) {
-                return;
-            }
-            this.element.setSelectionRange(pos, pos);
-        };
+        Object.defineProperty(InputElement.prototype, "caretPosition", {
+            get: function () {
+                if (this.type === InputType.number) {
+                    return -1;
+                }
+                return this.element.selectionStart;
+            },
+            set: function (pos) {
+                if (this.type === InputType.number) {
+                    return;
+                }
+                this.element.setSelectionRange(pos, pos);
+            },
+            enumerable: true,
+            configurable: true
+        });
         return InputElement;
     })();
     Fabrique.InputElement = InputElement;
@@ -156,22 +164,16 @@ var Fabrique;
 (function (Fabrique) {
     var InputField = (function (_super) {
         __extends(InputField, _super);
-        //public blockInput: boolean = true;
         function InputField(game, x, y, inputOptions) {
             var _this = this;
             if (inputOptions === void 0) { inputOptions = {}; }
             _super.call(this, game, x, y);
-            this.focusOutOnEnter = true;
             this.placeHolder = null;
             this.box = null;
             this.focus = false;
-            this.value = '';
             this.windowScale = 1;
-            /**
-             * Update function makes the cursor blink, it uses two private properties to make it toggle
-             *
-             * @returns {number}
-             */
+            this.scrollPos = new Phaser.Point();
+            this.cursorPos = new Phaser.Point();
             this.blink = true;
             this.cnt = 0;
             //Parse the options
@@ -185,7 +187,10 @@ var Fabrique;
             this.inputOptions.fillAlpha = (inputOptions.fillAlpha === undefined) ? 1 : inputOptions.fillAlpha;
             this.inputOptions.selectionColor = inputOptions.selectionColor || 'rgba(179, 212, 253, 0.8)';
             this.inputOptions.zoom = (!game.device.desktop) ? inputOptions.zoom || false : false;
-            this.focusOutOnEnter = this.inputOptions.focusOutOnEnter;
+            this.inputOptions.font = inputOptions.font || '14px Arial';
+            this.inputOptions.fontWeight = inputOptions.fontWeight || 'normal';
+            this.inputOptions.fill = inputOptions.fill || '#000000';
+            this.inputOptions.placeHolderColor = inputOptions.placeHolderColor || '#bfbebd';
             //create the input box
             this.box = new Fabrique.InputBox(this.game, inputOptions);
             this.setTexture(this.box.generateTexture());
@@ -193,73 +198,66 @@ var Fabrique;
             this.textMask = new Fabrique.TextMask(this.game, inputOptions);
             this.addChild(this.textMask);
             //Create the hidden dom elements
-            this.domElement = new Fabrique.InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(), this.inputOptions.type, this.value, this.inputOptions.wordWrap);
-            this.domElement.setMax(this.inputOptions.max, this.inputOptions.min);
-            this.selection = new Fabrique.SelectionHighlight(this.game, this.inputOptions);
-            this.addChild(this.selection);
+            this.domElement = new Fabrique.InputElement(this.game, 'phaser-input-' + (Math.random() * 10000 | 0).toString(), "", this.inputOptions);
             if (inputOptions.placeHolder && inputOptions.placeHolder.length > 0) {
                 this.placeHolder = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, inputOptions.placeHolder, {
-                    font: inputOptions.font || '14px Arial',
-                    fontWeight: inputOptions.fontWeight || 'normal',
-                    fill: inputOptions.placeHolderColor || '#bfbebd',
+                    font: inputOptions.font,
+                    fontWeight: inputOptions.fontWeight,
+                    fill: inputOptions.placeHolderColor,
                     wordWrap: inputOptions.wordWrap,
                     wordWrapWidth: inputOptions.width
                 });
                 this.placeHolder.mask = this.textMask;
+                this.placeHolder.useAdvancedWrap = true;
                 this.addChild(this.placeHolder);
             }
             this.cursor = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding - 2, '|', {
-                font: inputOptions.font || '14px Arial',
-                fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.cursorColor || '#000000'
+                font: inputOptions.font,
+                fontWeight: inputOptions.fontWeight,
+                fill: inputOptions.cursorColor
             });
             this.cursor.visible = false;
             this.addChild(this.cursor);
             this.text = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, '', {
-                font: inputOptions.font || '14px Arial',
-                fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.fill || '#000000',
+                font: inputOptions.font,
+                fontWeight: inputOptions.fontWeight,
+                fill: inputOptions.fill,
                 wordWrap: inputOptions.wordWrap,
                 wordWrapWidth: inputOptions.width
             });
             this.text.mask = this.textMask;
+            this.text.useAdvancedWrap = true;
             this.addChild(this.text);
             this.offscreenText = new Phaser.Text(game, this.inputOptions.padding, this.inputOptions.padding, '', {
-                font: inputOptions.font || '14px Arial',
-                fontWeight: inputOptions.fontWeight || 'normal',
-                fill: inputOptions.fill || '#000000',
+                font: inputOptions.font,
+                fontWeight: inputOptions.fontWeight,
+                fill: inputOptions.fill,
                 wordWrapWidth: inputOptions.width
             });
-            var caretPosition = this.getCaretPosition();
-            switch (this.inputOptions.align) {
-                case 'left':
-                    this.text.anchor.set(0, 0);
-                    this.cursor.x = this.inputOptions.padding + caretPosition.x;
-                    break;
-                case 'center':
-                    this.text.anchor.set(0.5, 0);
-                    this.text.x += this.inputOptions.width / 2;
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + caretPosition.x;
-                    break;
-                case 'right':
-                    this.text.anchor.set(1, 0);
-                    this.text.x += this.inputOptions.width;
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
-                    break;
-            }
-            this.cursor.y = caretPosition.y;
+            this.offscreenText.useAdvancedWrap = true;
+            this.selection = new Fabrique.SelectionHighlight(this.game, this.inputOptions, this.offscreenText, this.cursor);
+            this.addChild(this.selection);
+            this.updateTextPos();
             this.inputEnabled = true;
             this.input.useHandCursor = true;
             this.game.input.onDown.add(this.checkDown, this);
             this.domElement.focusOut.add(function () {
                 if (Fabrique.Plugins.InputField.KeyboardOpen) {
                     _this.endFocus();
-                    if (_this.inputOptions.zoom) {
-                        _this.zoomOut();
-                    }
                 }
             });
         }
+        Object.defineProperty(InputField.prototype, "value", {
+            get: function () {
+                return this.domElement.value;
+            },
+            set: function (val) {
+                this.domElement.value = val;
+                this.updateFromDomElement();
+            },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * This is a generic input down handler for the game.
          * if the input object is clicked, we gain focus on it and create the dom element
@@ -274,21 +272,11 @@ var Fabrique;
                 this.resetText();
             }
             if (this.input.checkPointerOver(e)) {
-                if (this.focus) {
-                    this.setCaretOnclick(e);
-                    return;
-                }
-                if (this.inputOptions.zoom && !Fabrique.Plugins.InputField.Zoomed) {
-                    this.zoomIn();
-                }
-                this.startFocus();
+                this.startFocus(e);
             }
             else {
                 if (this.focus === true) {
                     this.endFocus();
-                    if (this.inputOptions.zoom) {
-                        this.zoomOut();
-                    }
                 }
             }
         };
@@ -296,6 +284,15 @@ var Fabrique;
             if (!this.focus) {
                 return;
             }
+            this.updateFromDomElement();
+            this.updateCursorBlink();
+        };
+        /**
+         * Update function makes the cursor blink, it uses two private properties to make it toggle
+         *
+         * @returns {number}
+         */
+        InputField.prototype.updateCursorBlink = function () {
             if (this.cnt !== 30) {
                 return this.cnt++;
             }
@@ -327,98 +324,70 @@ var Fabrique;
                 Fabrique.Plugins.InputField.KeyboardOpen = false;
                 Fabrique.Plugins.InputField.onKeyboardClose.dispatch();
             }
+            if (this.inputOptions.zoom) {
+                this.zoomOut();
+            }
         };
         /**
          *
          */
-        InputField.prototype.startFocus = function () {
+        InputField.prototype.startFocus = function (e) {
             var _this = this;
+            if (this.game.device.desktop) {
+                //Timeout is a chrome hack
+                setTimeout(function () {
+                    _this.finishFocus(e);
+                }, 0);
+            }
+            else {
+                this.finishFocus(e);
+            }
+        };
+        InputField.prototype.finishFocus = function (e) {
             this.focus = true;
             if (null !== this.placeHolder) {
                 this.placeHolder.visible = false;
             }
-            if (this.game.device.desktop) {
-                //Timeout is a chrome hack
-                setTimeout(function () {
-                    _this.attachEvents();
-                }, 0);
-            }
-            else {
-                this.attachEvents();
-            }
+            this.domElement.addEventListeners(this.inputListener.bind(this), this.keyDownListener.bind(this), this.keyUpListener.bind(this));
+            this.domElement.focus();
+            //Make sure we have the correct scroll information
+            this.updateFromDomElement();
+            this.domElement.caretPosition = this.getCursorIndex(new PIXI.Point(e.x, e.y));
             if (!this.game.device.desktop) {
                 Fabrique.Plugins.InputField.KeyboardOpen = true;
                 Fabrique.Plugins.InputField.onKeyboardOpen.dispatch();
             }
-        };
-        InputField.prototype.attachEvents = function () {
-            this.domElement.addEventListeners(this.inputListener.bind(this), this.keyDownListener.bind(this), this.keyUpListener.bind(this));
-            this.domElement.focus();
+            if (this.inputOptions.zoom && !Fabrique.Plugins.InputField.Zoomed) {
+                this.zoomIn();
+            }
         };
         /**
-         * Update the text value in the box, and make sure the cursor is positioned correctly
+         * Update the text value in the box
          */
-        InputField.prototype.updateText = function () {
-            var text = '';
-            if (this.inputOptions.type === Fabrique.InputType.password) {
-                for (var i = 0; i < this.value.length; i++) {
-                    text += '*';
-                }
-            }
-            else if (this.inputOptions.type === Fabrique.InputType.number) {
-                var val = parseInt(this.value);
-                if (val < parseInt(this.inputOptions.min)) {
-                    text = this.inputOptions.min;
-                }
-                else if (val > parseInt(this.inputOptions.max)) {
-                    text = this.inputOptions.max;
+        InputField.prototype.updateTextFromElement = function () {
+            if (null !== this.placeHolder) {
+                if (this.value.length > 0) {
+                    this.placeHolder.visible = false;
                 }
                 else {
-                    text = this.value;
+                    this.placeHolder.visible = true;
                 }
             }
-            else {
-                text = this.value;
-            }
-            this.text.setText(text);
-            if (this.text.width > this.inputOptions.width) {
-                this.text.anchor.x = 1;
-                this.text.x = this.inputOptions.padding + this.inputOptions.width;
+            this.text.setText(this.value);
+            if (this.inputOptions.wordWrap) {
+                this.lines = this.offscreenText.precalculateWordWrap(this.value);
             }
             else {
-                switch (this.inputOptions.align) {
-                    case 'left':
-                        this.text.anchor.set(0, 0);
-                        this.text.x = this.inputOptions.padding;
-                        break;
-                    case 'center':
-                        this.text.anchor.set(0.5, 0);
-                        this.text.x = this.inputOptions.padding + this.inputOptions.width / 2;
-                        break;
-                    case 'right':
-                        this.text.anchor.set(1, 0);
-                        this.text.x = this.inputOptions.padding + this.inputOptions.width;
-                        break;
-                }
+                this.lines = [this.value];
             }
         };
         /**
          * Updates the position of the caret in the phaser input field
          */
-        InputField.prototype.updateCursor = function () {
-            var caretPosition = this.getCaretPosition();
-            switch (this.inputOptions.align) {
-                case 'right':
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width;
-                    break;
-                case 'left':
-                    this.cursor.x = this.inputOptions.padding + caretPosition.x;
-                    break;
-                case 'center':
-                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + caretPosition.x;
-                    break;
-            }
-            this.cursor.y = caretPosition.y;
+        InputField.prototype.updateCursorFromElement = function () {
+            this.cursorPos = this.getCaretPosition();
+            this.scrollTo(this.cursorPos);
+            this.updateCursorPos();
         };
         /**
          * Fetches the carrot position from the dom element. This one changes when you use the keyboard to navigate the element
@@ -426,8 +395,7 @@ var Fabrique;
          * @returns {number}
          */
         InputField.prototype.getCaretPosition = function () {
-            //TODO: Position caret at the edge of the textfield if there is more text than can fit visually
-            var caretPosition = this.domElement.getCaretPosition();
+            var caretPosition = this.domElement.caretPosition;
             if (-1 === caretPosition) {
                 caretPosition = this.value.length;
             }
@@ -440,23 +408,21 @@ var Fabrique;
             }
             if (this.inputOptions.wordWrap) {
                 //Measure the number of lines down
-                var lines = this.text.precalculateWordWrap(this.value);
+                var lines = this.lines;
                 var index = 0;
                 for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
-                    line = line.slice(0, -1);
                     if (index + line.length >= caretPosition) {
                         var lineOffset = caretPosition - index;
-                        console.log(caretPosition, i, index, lineOffset);
                         line = line.slice(0, lineOffset);
                         this.text.context.font = this.text.cssFont;
                         var width = this.text.context.measureText(line).width;
-                        return { x: width, y: this.cursor.height * i };
+                        return new Phaser.Point(width, this.cursor.height * i);
                     }
                     else if (i == lines.length - 1) {
                         this.text.context.font = this.text.cssFont;
                         var width = this.text.context.measureText(line).width;
-                        return { x: width, y: this.cursor.height * i };
+                        return new Phaser.Point(width, this.cursor.height * i);
                     }
                     index += line.length + 1;
                 }
@@ -464,31 +430,25 @@ var Fabrique;
             else {
                 this.text.context.font = this.text.cssFont;
                 var width = this.text.context.measureText(text.slice(0, caretPosition)).width;
-                return { x: width, y: 0 };
+                return new Phaser.Point(width, 0);
             }
         };
-        /**
-         * Set the caret when a click was made in the input field
-         *
-         * @param e
-         */
-        InputField.prototype.setCaretOnclick = function (e) {
-            var localPoint = (this.text.toLocal(new PIXI.Point(e.x, e.y), this.game.world));
+        InputField.prototype.updateFromDomElement = function () {
+            this.updateTextFromElement();
+            this.updateCursorFromElement();
+            this.updateSelection();
+        };
+        InputField.prototype.getCursorIndex = function (globalPoint) {
+            var localPoint = (this.text.toLocal(new PIXI.Point(globalPoint.x, globalPoint.y), this.game.world));
             if (this.inputOptions.align && this.inputOptions.align === 'center') {
                 localPoint.x += this.text.width / 2;
             }
-            var index = this.getCursorIndex(localPoint);
-            this.startFocus();
-            this.domElement.setCaretPosition(index);
-            this.updateCursor();
-        };
-        InputField.prototype.getCursorIndex = function (localPoint) {
             var index = 0;
             if (this.inputOptions.wordWrap) {
                 var lines = this.text.precalculateWordWrap(this.value);
+                //TODO: Try binary search to speed this up
                 for (var i = 0, lineY = this.cursor.height; i < lines.length; i++, lineY += this.cursor.height) {
                     var line = lines[i];
-                    line = line.slice(0, -1);
                     //The last character in the line is an extra character so don't use it
                     for (var j = 0; j < line.length; j++, index++) {
                         this.text.context.font = this.text.cssFont;
@@ -507,6 +467,7 @@ var Fabrique;
                 for (var j = 0; j < this.value.length; j++, index++) {
                     this.text.context.font = this.text.cssFont;
                     var width = this.text.context.measureText(this.value.slice(0, j)).width;
+                    //TODO: Try binary search to speed this up
                     if (width >= localPoint.x) {
                         return (index > 0 ? index - 1 : index);
                     }
@@ -516,6 +477,8 @@ var Fabrique;
         };
         /**
          * This checks if a select has been made, and if so highlight it with blue
+         * TODO: Handle multiline selection
+         * TODO: Handle mouse selection
          */
         InputField.prototype.updateSelection = function () {
             if (this.domElement.hasSelection) {
@@ -526,19 +489,16 @@ var Fabrique;
                         text += '*';
                     }
                 }
-                text = text.substring(this.domElement.caretStart, this.domElement.caretEnd);
-                this.offscreenText.setText(text);
-                //TODO: Handle multiline selection
-                //TODO: Handle keyboard selection
-                this.selection.updateSelection(this.offscreenText.getBounds());
+                this.selection.updateSelection(this.domElement.caretStart, this.domElement.caretEnd, this.lines);
                 switch (this.inputOptions.align) {
                     case 'left':
-                        this.selection.x = this.inputOptions.padding;
+                        this.selection.x = this.inputOptions.padding - this.scrollPos.x;
                         break;
                     case 'center':
-                        this.selection.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2;
+                        this.selection.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 - this.scrollPos.x;
                         break;
                 }
+                this.selection.y = -this.scrollPos.y;
             }
             else {
                 this.selection.clear();
@@ -575,21 +535,13 @@ var Fabrique;
         };
         InputField.prototype.keyDownListener = function (evt) {
             if (evt.keyCode === 13) {
-                if (this.focusOutOnEnter) {
+                if (this.inputOptions.focusOutOnEnter) {
                     this.endFocus();
                     return;
                 }
             }
-            this.value = this.domElement.value;
-            this.updateText();
-            this.updateCursor();
-            this.updateSelection();
         };
         InputField.prototype.keyUpListener = function (evt) {
-            this.value = this.domElement.value;
-            this.updateText();
-            this.updateCursor();
-            this.updateSelection();
         };
         /**
          * We overwrite the destroy method because we want to delete the (hidden) dom element when the inputField was removed
@@ -602,23 +554,54 @@ var Fabrique;
          * Resets the text to an empty value
          */
         InputField.prototype.resetText = function () {
-            this.setText();
+            this.value = "";
         };
-        InputField.prototype.setText = function (text) {
-            if (text === void 0) { text = ''; }
-            if (null !== this.placeHolder) {
-                if (text.length > 0) {
-                    this.placeHolder.visible = false;
-                }
-                else {
-                    this.placeHolder.visible = true;
-                }
+        InputField.prototype.scrollTo = function (cursorPos) {
+            if (cursorPos.x < this.scrollPos.x) {
+                this.scrollPos.x += cursorPos.x - this.scrollPos.x;
             }
-            this.value = text;
-            this.domElement.value = this.value;
-            this.updateText();
-            this.updateCursor();
-            this.endFocus();
+            else if (cursorPos.x > this.scrollPos.x + this.inputOptions.width) {
+                this.scrollPos.x += cursorPos.x - this.scrollPos.x - this.inputOptions.width;
+            }
+            if (cursorPos.y < this.scrollPos.y) {
+                this.scrollPos.y += cursorPos.y - this.scrollPos.y;
+            }
+            else if (cursorPos.y > this.scrollPos.y + this.inputOptions.height - this.cursor.height) {
+                this.scrollPos.y += cursorPos.y + this.cursor.height - this.scrollPos.y - this.inputOptions.height;
+            }
+            this.updateTextPos();
+            this.updateCursorPos();
+        };
+        InputField.prototype.updateTextPos = function () {
+            switch (this.inputOptions.align) {
+                case 'left':
+                    this.text.anchor.set(0, 0);
+                    this.text.x = -this.scrollPos.x;
+                    break;
+                case 'center':
+                    this.text.anchor.set(0.5, 0);
+                    this.text.x = this.inputOptions.width / 2 - this.scrollPos.x;
+                    break;
+                case 'right':
+                    this.text.anchor.set(1, 0);
+                    this.text.x = this.inputOptions.width - this.scrollPos.x;
+                    break;
+            }
+            this.text.y = -this.scrollPos.y;
+        };
+        InputField.prototype.updateCursorPos = function () {
+            switch (this.inputOptions.align) {
+                case 'left':
+                    this.cursor.x = this.inputOptions.padding + this.cursorPos.x - this.scrollPos.x;
+                    break;
+                case 'center':
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.text.width / 2 + this.cursorPos.x - this.scrollPos.x;
+                    break;
+                case 'right':
+                    this.cursor.x = this.inputOptions.padding + this.inputOptions.width - this.scrollPos.x;
+                    break;
+            }
+            this.cursor.y = this.cursorPos.y - this.scrollPos.y;
         };
         return InputField;
     })(Phaser.Sprite);
@@ -655,15 +638,40 @@ var Fabrique;
 (function (Fabrique) {
     var SelectionHighlight = (function (_super) {
         __extends(SelectionHighlight, _super);
-        function SelectionHighlight(game, inputOptions) {
+        function SelectionHighlight(game, inputOptions, text, cursor) {
             _super.call(this, game, inputOptions.padding, inputOptions.padding);
             this.inputOptions = inputOptions;
+            this.text = text;
+            this.cursor = cursor;
         }
-        SelectionHighlight.prototype.updateSelection = function (rect) {
+        SelectionHighlight.prototype.updateSelection = function (start, end, lines) {
+            //Swap start and end if it's a backwards selection
+            if (start > end) {
+                var temp = start;
+                start = end;
+                end = temp;
+            }
             var color = Phaser.Color.webToColor(this.inputOptions.selectionColor);
             this.clear();
-            this.beginFill(SelectionHighlight.rgb2hex(color), color.a);
-            this.drawRect(rect.x, rect.y, rect.width, rect.height - this.inputOptions.padding);
+            var index = 0;
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (index >= end) {
+                    return;
+                }
+                if (index + line.length >= start && index <= end) {
+                    var startIdx = start > index ? start - index : 0;
+                    var endIdx = index + line.length <= end ? line.length : end - index;
+                    this.text.context.font = this.text.cssFont;
+                    var startPos = this.text.context.measureText(line.slice(0, startIdx));
+                    var endPos = this.text.context.measureText(line.slice(0, endIdx));
+                    this.beginFill(SelectionHighlight.rgb2hex(color), color.a);
+                    console.log(startIdx, endIdx, startPos, endPos, i);
+                    this.drawRect(startPos.width, i * this.cursor.height, endPos.width - startPos.width, this.cursor.height);
+                    this.endFill();
+                }
+                index += line.length + 1;
+            }
         };
         SelectionHighlight.rgb2hex = function (color) {
             return parseInt(("0" + color.r.toString(16)).slice(-2) +
