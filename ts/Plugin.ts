@@ -1,4 +1,4 @@
-///<reference path="./phaser-input-shim.d.ts"/>
+///<reference path="../typings/phaser-input-shim.d.ts"/>
 
 module Fabrique {
     export module Plugins {

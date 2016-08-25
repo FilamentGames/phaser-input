@@ -2,7 +2,7 @@ var fs = require('fs');
 var os = require('os');
 
 module.exports = function (config) {
-	var sources = ['src/**/*.test.ts'];
+	var sources = ['node_modules/phaser/build/phaser.js', 'ts/**/*.ts'];
 
 	config.set({
 		// base path, that will be used to resolve files and exclude
@@ -24,9 +24,10 @@ module.exports = function (config) {
 		typescriptPreprocessor: {
 			// options passed to the typescript compiler
 			options: {
-				sourceMap: true,
+				sourceMap: false,
 				target: 'ES5',
-				module: 'commonjs',
+				module: 'amd',
+				delaration: true,
 				compilerOptions: {
 					moduleResolution: "node"
 				},
