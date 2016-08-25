@@ -306,15 +306,18 @@ module Fabrique {
             switch (this.inputOptions.align) {
                 case 'left':
                     this.text.anchor.set(0, 0);
-                    this.text.x = this.inputOptions.padding;
+                    this.text.x = this.inputOptions.padding - this.domElement.scrollLeft;
+                    this.text.y = -this.domElement.scrollTop;
                     break;
                 case 'center':
                     this.text.anchor.set(0.5, 0);
-                    this.text.x = this.inputOptions.padding + this.inputOptions.width / 2;
+                    this.text.x = this.inputOptions.padding + this.inputOptions.width / 2 - this.domElement.scrollLeft;
+                    this.text.y = -this.domElement.scrollTop;
                     break;
                 case 'right':
                     this.text.anchor.set(1, 0);
-                    this.text.x = this.inputOptions.padding + this.inputOptions.width;
+                    this.text.x = this.inputOptions.padding + this.inputOptions.width - this.domElement.scrollLeft;
+                    this.text.y = -this.domElement.scrollTop;
                     break;
             }
 

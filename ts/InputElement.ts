@@ -46,6 +46,7 @@ module Fabrique {
             this.element.style.width = options.width + 'px';
             this.element.style.height = options.height + 'px';
             this.element.style.font = options.font;
+            this.element.style.textAlign = options.align;
             this.element.style.fontWeight = options.fontWeight.toString();
             this.element.value = this.value;
 
