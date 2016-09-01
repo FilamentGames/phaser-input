@@ -286,7 +286,6 @@ module Fabrique {
 
             //Don't do anything if the text hasn't changed
             if (this.cachedValue == this.value) {
-                console.log("Cached!");
                 return;
             }
 
