@@ -106,7 +106,6 @@ module Fabrique {
                     font: inputOptions.font,
                     fontWeight: inputOptions.fontWeight,
                     fill: inputOptions.placeHolderColor,
-                    wordWrap: inputOptions.wordWrap,
                     wordWrapWidth: inputOptions.width
                 });
                 this.placeHolder.mask = this.textMask;
@@ -126,7 +125,6 @@ module Fabrique {
                 font: inputOptions.font,
                 fontWeight: inputOptions.fontWeight,
                 fill: inputOptions.fill,
-                wordWrap: inputOptions.wordWrap,
                 wordWrapWidth: inputOptions.width
             });
             this.text.mask = this.textMask;
@@ -299,13 +297,13 @@ module Fabrique {
                 }
             }
 
-            this.text.setText(this.value);
-
             if (this.inputOptions.wordWrap) {
                 this.lines = this.offscreenText.precalculateWordWrap(this.value);
             } else {
                 this.lines = [this.value];
             }
+
+            this.text.setText(this.lines.join('\n'));
         }
 
         /**
