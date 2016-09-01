@@ -57,6 +57,8 @@ module Fabrique {
 
         private cursorPos:Phaser.Point = new Phaser.Point();
 
+        private cachedValue:string;
+
         public get value():string {
             return this.domElement.value;
         }
@@ -281,6 +283,15 @@ module Fabrique {
          * Update the text value in the box
          */
         private updateTextFromElement() {
+
+            //Don't do anything if the text hasn't changed
+            if (this.cachedValue == this.value) {
+                console.log("Cached!");
+                return;
+            }
+
+            this.cachedValue = this.value;
+
             if (null !== this.placeHolder) {
                 if (this.value.length > 0) {
                     this.placeHolder.visible = false;
