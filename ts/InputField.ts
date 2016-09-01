@@ -68,6 +68,18 @@ module Fabrique {
             this.updateFromDomElement();
         }
 
+        public get displayText():string {
+            var text = this.value;
+            if (this.inputOptions.type === Fabrique.InputType.password) {
+                text = '';
+                for (let i = 0; i < this.value.length; i++) {
+                    text += '*';
+                }
+            }
+
+            return text;
+        }
+
         constructor(game:Phaser.Game, x:number, y:number, inputOptions:InputOptions = {}) {
             super(game, x, y);
 
@@ -297,10 +309,12 @@ module Fabrique {
                 }
             }
 
+            var text = this.displayText;
+
             if (this.inputOptions.wordWrap) {
-                this.lines = this.offscreenText.precalculateWordWrap(this.value);
+                this.lines = this.offscreenText.precalculateWordWrap(text);
             } else {
-                this.lines = [this.value];
+                this.lines = [text];
             }
 
             this.text.setText(this.lines.join('\n'));
@@ -326,13 +340,7 @@ module Fabrique {
                 caretPosition = this.value.length;
             }
 
-            var text = this.value;
-            if (this.inputOptions.type === Fabrique.InputType.password) {
-                text = '';
-                for (let i = 0; i < this.value.length; i++) {
-                    text += '*';
-                }
-            }
+            var text = this.displayText;
 
             if (this.inputOptions.wordWrap) {
                 //Measure the number of lines down
@@ -421,14 +429,6 @@ module Fabrique {
          */
         private updateSelection(): void {
             if (this.domElement.hasSelection) {
-                var text = this.value;
-                if (this.inputOptions.type === Fabrique.InputType.password) {
-                    text = '';
-                    for (let i = 0; i < this.value.length; i++) {
-                        text += '*';
-                    }
-                }
-
                 this.selection.updateSelection(this.domElement.caretStart, this.domElement.caretEnd, this.lines);
 
                 switch (this.inputOptions.align) {
