@@ -1,9 +1,9 @@
 /*!
- * phaser-input - version 1.2.3-filament5 
+ * phaser-input - version 1.2.5-filament1 
  * Adds input boxes to Phaser like CanvasInput, but also works for WebGL and Mobile, made for Phaser only.
  *
  * OrangeGames
- * Build at 25-08-2016
+ * Build at 05-10-2016
  * Released under MIT License 
  */
 
@@ -204,7 +204,6 @@ var Fabrique;
                     font: inputOptions.font,
                     fontWeight: inputOptions.fontWeight,
                     fill: inputOptions.placeHolderColor,
-                    wordWrap: inputOptions.wordWrap,
                     wordWrapWidth: inputOptions.width
                 });
                 this.placeHolder.mask = this.textMask;
@@ -222,7 +221,6 @@ var Fabrique;
                 font: inputOptions.font,
                 fontWeight: inputOptions.fontWeight,
                 fill: inputOptions.fill,
-                wordWrap: inputOptions.wordWrap,
                 wordWrapWidth: inputOptions.width
             });
             this.text.mask = this.textMask;
@@ -254,6 +252,20 @@ var Fabrique;
             set: function (val) {
                 this.domElement.value = val;
                 this.updateFromDomElement();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(InputField.prototype, "displayText", {
+            get: function () {
+                var text = this.value;
+                if (this.inputOptions.type === Fabrique.InputType.password) {
+                    text = '';
+                    for (var i = 0; i < this.value.length; i++) {
+                        text += '*';
+                    }
+                }
+                return text;
             },
             enumerable: true,
             configurable: true
@@ -365,6 +377,11 @@ var Fabrique;
          * Update the text value in the box
          */
         InputField.prototype.updateTextFromElement = function () {
+            //Don't do anything if the text hasn't changed
+            if (this.cachedValue == this.value) {
+                return;
+            }
+            this.cachedValue = this.value;
             if (null !== this.placeHolder) {
                 if (this.value.length > 0) {
                     this.placeHolder.visible = false;
@@ -373,13 +390,14 @@ var Fabrique;
                     this.placeHolder.visible = true;
                 }
             }
-            this.text.setText(this.value);
+            var text = this.displayText;
             if (this.inputOptions.wordWrap) {
-                this.lines = this.offscreenText.precalculateWordWrap(this.value);
+                this.lines = this.offscreenText.precalculateWordWrap(text);
             }
             else {
-                this.lines = [this.value];
+                this.lines = [text];
             }
+            this.text.setText(this.lines.join('\n'));
         };
         /**
          * Updates the position of the caret in the phaser input field
@@ -399,13 +417,7 @@ var Fabrique;
             if (-1 === caretPosition) {
                 caretPosition = this.value.length;
             }
-            var text = this.value;
-            if (this.inputOptions.type === Fabrique.InputType.password) {
-                text = '';
-                for (var i_1 = 0; i_1 < this.value.length; i_1++) {
-                    text += '*';
-                }
-            }
+            var text = this.displayText;
             if (this.inputOptions.wordWrap) {
                 //Measure the number of lines down
                 var lines = this.lines;
@@ -482,13 +494,6 @@ var Fabrique;
          */
         InputField.prototype.updateSelection = function () {
             if (this.domElement.hasSelection) {
-                var text = this.value;
-                if (this.inputOptions.type === Fabrique.InputType.password) {
-                    text = '';
-                    for (var i = 0; i < this.value.length; i++) {
-                        text += '*';
-                    }
-                }
                 this.selection.updateSelection(this.domElement.caretStart, this.domElement.caretEnd, this.lines);
                 switch (this.inputOptions.align) {
                     case 'left':
@@ -577,17 +582,32 @@ var Fabrique;
                 case 'left':
                     this.text.anchor.set(0, 0);
                     this.text.x = -this.scrollPos.x;
+                    if (this.placeHolder) {
+                        this.placeHolder.anchor.set(0, 0);
+                        this.placeHolder.x = -this.scrollPos.x;
+                    }
                     break;
                 case 'center':
                     this.text.anchor.set(0.5, 0);
                     this.text.x = this.inputOptions.width / 2 - this.scrollPos.x;
+                    if (this.placeHolder) {
+                        this.placeHolder.anchor.set(0.5, 0);
+                        this.placeHolder.x = this.inputOptions.width / 2 - this.scrollPos.x;
+                    }
                     break;
                 case 'right':
                     this.text.anchor.set(1, 0);
                     this.text.x = this.inputOptions.width - this.scrollPos.x;
+                    if (this.placeHolder) {
+                        this.placeHolder.anchor.set(1, 0);
+                        this.placeHolder.x = this.inputOptions.width - this.scrollPos.x;
+                    }
                     break;
             }
             this.text.y = -this.scrollPos.y;
+            if (this.placeHolder) {
+                this.placeHolder.y = -this.scrollPos.y;
+            }
         };
         InputField.prototype.updateCursorPos = function () {
             switch (this.inputOptions.align) {

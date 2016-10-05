@@ -71,7 +71,9 @@ declare module Fabrique {
         private windowScale;
         private scrollPos;
         private cursorPos;
+        private cachedValue;
         value: string;
+        displayText: string;
         constructor(game: Phaser.Game, x: number, y: number, inputOptions?: InputOptions);
         /**
          * This is a generic input down handler for the game.
@@ -134,7 +136,7 @@ declare module Fabrique {
         /**
          * We overwrite the destroy method because we want to delete the (hidden) dom element when the inputField was removed
          */
-        destroy(destroyChildren?: boolean): void;
+        destroy(): void;
         /**
          * Resets the text to an empty value
          */
