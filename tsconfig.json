@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+	"module": "amd",
+	"target": "es5",
+	"sourceMap": true,
+	"declaration": true,
+	"moduleResolution": "node",
+	"references": [
+	  "typings/tsd.d.ts"
+	],
+	"noImplicitAny": true
+  }
+}
