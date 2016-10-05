@@ -531,19 +531,22 @@ module Fabrique {
             switch (this.inputOptions.align) {
                 case 'left':
                     this.text.anchor.set(0, 0);
-                    this.text.x = -this.scrollPos.x;
+                    this.placeHolder.anchor.set(0, 0);
+                    this.text.x = this.placeHolder.x = -this.scrollPos.x;
                     break;
                 case 'center':
                     this.text.anchor.set(0.5, 0);
-                    this.text.x = this.inputOptions.width / 2 - this.scrollPos.x;
+                    this.placeHolder.anchor.set(0.5, 0);
+                    this.text.x = this.placeHolder.x = this.inputOptions.width / 2 - this.scrollPos.x;
                     break;
                 case 'right':
                     this.text.anchor.set(1, 0);
-                    this.text.x = this.inputOptions.width - this.scrollPos.x;
+                    this.placeHolder.anchor.set(1, 0);
+                    this.text.x = this.placeHolder.x = this.inputOptions.width - this.scrollPos.x;
                     break;
             }
 
-            this.text.y = -this.scrollPos.y;
+            this.text.y = this.placeHolder.y = -this.scrollPos.y;
         }
 
         private updateCursorPos() {

@@ -23,17 +23,7 @@ module.exports = function (config) {
 
 		typescriptPreprocessor: {
 			// options passed to the typescript compiler
-			options: {
-				compilerOptions: {
-					target: 'es5',
-					sourceMap: true,
-					moduleResolution: "node",
-					references: [
-						'typings/tsd.d.ts'
-					],
-					noImplicitAny: true
-				}
-			},
+			options: require("./tsconfig.json")
 		},
 
 		// use dots reporter, as travis terminal does not support escaping sequences
