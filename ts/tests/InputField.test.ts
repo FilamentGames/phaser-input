@@ -24,7 +24,7 @@ describe("InputField", () => {
         }, true);
     }, 10000);
 
-    it("can display a single line input field with a centered placeholder", (cb) => {
+    fit("can display a single line input field with a centered placeholder", (cb) => {
         var game = new Phaser.Game(<Phaser.IGameConfig>{
             width: "100%",
             height: "100%"
@@ -190,7 +190,7 @@ describe("InputField", () => {
         }, true);
     }, 10000);
 
-    it("can wrap text correctly in a multiline text field", (cb) => {
+    fit("can wrap text correctly in a multiline text field", (cb) => {
         var game = new Phaser.Game(<Phaser.IGameConfig>{
             width: "100%",
             height: "100%"
